@@ -68,3 +68,12 @@ class MemberItem(scrapy.Item):
     url = scrapy.Field(output_processor=TakeFirst())
 
     memberships = scrapy.Field()
+
+
+class MemberChangeItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    date = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    change_type = scrapy.Field(output_processor=TakeFirst())
+    change_reason = scrapy.Field(output_processor=TakeFirst())
