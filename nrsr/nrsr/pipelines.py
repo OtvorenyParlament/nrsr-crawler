@@ -37,7 +37,6 @@ class NrsrPipeline(object):
             match_dict = {
                 'type': item_type,
                 'external_id': item['external_id'],
-                'period_num': item['period_num']
             }
         else:
             raise Exception("unknown type {}".format(item['type']))
