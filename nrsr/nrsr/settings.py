@@ -19,7 +19,7 @@ NEWSPIDER_MODULE = 'nrsr.spiders'
 #USER_AGENT = 'nrsr (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -27,10 +27,10 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = .6
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
-#CONCURRENT_REQUESTS_PER_IP = 16
+CONCURRENT_REQUESTS_PER_IP = 1
 
 # Disable cookies (enabled by default)
 #COOKIES_ENABLED = False
@@ -50,11 +50,20 @@ ROBOTSTXT_OBEY = True
 #    'nrsr.middlewares.NrsrSpiderMiddleware': 543,
 #}
 
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
+
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
 #    'nrsr.middlewares.NrsrDownloaderMiddleware': 543,
 #}
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
@@ -67,6 +76,18 @@ ROBOTSTXT_OBEY = True
 #ITEM_PIPELINES = {
 #    'nrsr.pipelines.NrsrPipeline': 300,
 #}
+ITEM_PIPELINES = {
+    'nrsr.pipelines.NrsrPipeline': 300,
+    'scrapy.pipelines.images.ImagesPipeline': 1,
+    'scrapy.pipelines.files.FilesPipeline': 1
+}
+IMAGES_STORE = './photos'
+FILES_STORE = './files'
+
+# FILES_URLS_FIELD = 'attachments_urls'
+# FILES_RESULT_FIELD = 'attachments'
+FILES_URLS_FIELD = 'do_not_download_for_now'
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,3 +109,12 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+SPLASH_URL = 'http://172.17.0.2:8050'
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+SPLASH_COOKIES_DEBUG = True
+
+
+MONGO_DATABASE = 'nrsr'
+MONGO_URI = 'mongodb://localhost'

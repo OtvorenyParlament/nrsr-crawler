@@ -1,14 +1,21 @@
-# -*- coding: utf-8 -*-
-
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://doc.scrapy.org/en/latest/topics/items.html
+"""
+NRSR Items
+"""
 
 import scrapy
+from scrapy.loader.processors import TakeFirst
 
 
-class NrsrItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class ClubItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    name = scrapy.Field(output_processor=TakeFirst())
+    email = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    members = scrapy.Field()
+    url = scrapy.Field()
+
+
+class ClubMemberItem(scrapy.Item):
+    external_id = scrapy.Field()
+    membership = scrapy.Field()
