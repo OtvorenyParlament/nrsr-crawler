@@ -77,3 +77,18 @@ class MemberChangeItem(scrapy.Item):
     external_id = scrapy.Field(output_processor=TakeFirst())
     change_type = scrapy.Field(output_processor=TakeFirst())
     change_reason = scrapy.Field(output_processor=TakeFirst())
+
+
+class ParliamentPressItem(scrapy.Item):
+    type = scrapy.Field()
+    title = scrapy.Field()
+    num = scrapy.Field()
+    group_num = scrapy.Field()
+    period_num = scrapy.Field()
+    press_type = scrapy.Field()
+    date = scrapy.Field()
+    attachments_names = scrapy.Field()
+    attachments_urls = scrapy.Field()
+    attachments = scrapy.Field()
+    raw = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())

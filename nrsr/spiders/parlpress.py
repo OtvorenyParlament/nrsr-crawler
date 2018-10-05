@@ -1,0 +1,199 @@
+"""
+Parliament Press Spider
+"""
+
+import re
+from urllib.parse import urlparse, parse_qs
+import scrapy
+from scrapy_splash import SplashRequest, SplashFormRequest
+from urllib.parse import urlencode, urlparse, parse_qs
+
+from nrsr.items import ParliamentPressItem
+
+class PressSpider(scrapy.Spider):
+    name = 'parlpress'
+    BASE_URL = 'https://www.nrsr.sk/web/'
+    crawled_pages = {}
+
+    def start_requests(self):
+        urls = [
+            'https://www.nrsr.sk/web/Default.aspx?sid=schodze%2fcpt&Text=&CisObdobia=7&FullText=False&TypTlaceID=-1'
+
+        ]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
+
+
+    def parse(self, response):
+        periods = response.xpath(
+            '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
+        for period in periods:
+            if int(period) == 1:
+                continue
+            # parse period
+            viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
+            eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
+            viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
+            scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
+            scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
+            post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
+            body = {
+                '__EVENTTARGET': '',
+                '__EVENTARGUMENT': '',
+                '__VIEWSTATE': viewstate,
+                '__VIEWSTATEGENERATOR': viewstategenerator,
+                '__EVENTVALIDATION': eventvalidation,
+                '__SCROLLPOSITIONX': scroll_x,
+                '__SCROLLPOSITIONY': scroll_y,
+                '_searchText': '',
+                '_sectionLayoutContainer$ctl01$ctlNazov': '',
+                '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
+                '_sectionLayoutContainer$ctl01$ctlCPT': '',
+                '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
+                '_sectionLayoutContainer$ctl01$DatumOd': '',
+                '_sectionLayoutContainer$ctl01$DatumDo': '',
+                '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
+                '_sectionLayoutContainer$ctl01$cmdSearch': 'Vyhľadať',
+                '_sectionLayoutContainer$ctl01$ctl00$txtDescriptorText': '',
+                '_sectionLayoutContainer$ctl01$ctl00$cboLanguages': '3',
+                '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
+                '_sectionLayoutContainer$ctl00$_calendarMonth': '9',
+                '_sectionLayoutContainer$ctl00$_calendarApp': 'nrcpt_all',
+                '_sectionLayoutContainer$ctl00$_calendarLang': '',
+                '_sectionLayoutContainer$ctl00$_monthSelector': '9',
+                '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
+            }
+
+            yield SplashRequest(
+                '{}{}'.format(self.BASE_URL, post_action),
+                self.parse_pages,
+                args={
+                    'http_method': 'POST',
+                    'body': urlencode(body),
+                }
+            )
+
+
+    def parse_pages(self, response):
+        pages = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href'
+        ).extract()
+        pages = list(set(pages))
+        post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
+        url_parsed = urlparse(post_action)
+        url_qs = parse_qs(url_parsed.query)
+        period = url_qs['CisObdobia'][0]
+        current_page = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
+        ).extract()
+
+        if current_page[0].isdigit():
+            self.crawled_pages['{}_{}'.format(period, current_page[0])] = True
+        cleaned_pages = []
+        for page in pages:
+            page_match = re.match(r'.*(Page.*[0-9]).*', page)
+            if not page_match:
+                continue
+            page_num = page_match.groups()[0].split('$')[-1]
+            crawled_string = '{}_{}'.format(period, page_num)
+            if crawled_string in self.crawled_pages:
+                print("{} already crawled".format(crawled_string))
+                continue
+            cleaned_pages.append(page_match.groups()[0])
+        for page in cleaned_pages:
+            eventargument = page
+            page_num = eventargument.split('$')[-1]
+            viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
+            eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
+            viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
+            scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
+            scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
+            eventtarget = '_sectionLayoutContainer$ctl01$dgResult2'
+            body = {
+                '__EVENTTARGET': eventtarget,
+                '__EVENTARGUMENT': eventargument,
+                '__VIEWSTATE': viewstate,
+                '__VIEWSTATEGENERATOR': viewstategenerator,
+                '__EVENTVALIDATION': eventvalidation,
+                '__SCROLLPOSITIONX': scroll_x,
+                '__SCROLLPOSITIONY': scroll_y,
+                '_searchText': '',
+                '_sectionLayoutContainer$ctl01$ctlNazov': '',
+                '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
+                '_sectionLayoutContainer$ctl01$ctlCPT': '',
+                '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
+                '_sectionLayoutContainer$ctl01$DatumOd': '',
+                '_sectionLayoutContainer$ctl01$DatumDo': '',
+                '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
+                '_sectionLayoutContainer$ctl01$ctl00$txtDescriptorText': '',
+                '_sectionLayoutContainer$ctl01$ctl00$cboLanguages': '3',
+                '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
+                '_sectionLayoutContainer$ctl00$_calendarMonth': '9',
+                '_sectionLayoutContainer$ctl00$_calendarApp': 'nrcpt_all',
+                '_sectionLayoutContainer$ctl00$_calendarLang': '',
+                '_sectionLayoutContainer$ctl00$_monthSelector': '9',
+                '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
+            }
+            yield SplashRequest(
+                # response.url,
+                '{}{}'.format(self.BASE_URL, post_action),
+                self.parse_pages,
+                args={
+                    'http_method': 'POST',
+                    # 'url': response.meta['url'],
+                    'body': urlencode(body),
+                },
+                # meta=meta,
+                meta={'page': True}
+            )
+
+        items = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[position()>1]')
+        for item in items:
+            press_num = item.xpath('td[1]/a/text()').extract_first()
+            press_url = item.xpath('td[1]/a/@href').extract_first()
+            if press_url:
+                url = '{}{}'.format(self.BASE_URL, press_url)
+                yield scrapy.Request(
+                    url,
+                    callback=self.parse_press,
+                    meta={'period_num': period}
+                )
+
+    def parse_press(self, response):
+        press = ParliamentPressItem()
+        press['period_num'] = response.meta['period_num']
+        press['type'] = 'press'
+        try:
+            press['title'] = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[4]/span/text()').extract_first().strip()
+        except KeyError:
+            press['title'] = None
+        try:
+            press['num'] = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[1]/span/text()').extract_first().strip()
+        except KeyError:
+            press['num'] = None
+        try:
+            press['press_type'] = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[2]/span/text()').extract_first().strip()
+        except KeyError:
+            press['press_type'] = None
+        try:
+            press['date'] = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()').extract_first().strip()
+        except KeyError:
+            press['date'] = None
+        press['attachments_names'] = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[5]/span/a/text()').extract()
+        attachments = []
+        for x in response.xpath('//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[5]/span/a'):
+            attachments.append({
+                'url': '{}{}'.format(self.BASE_URL, x.xpath('@href').extract_first()),
+                'name': x.xpath('text()').extract_first().strip(),
+            })
+        press['attachments_names'] = attachments
+        press['attachments_urls'] = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[5]/span/a/@href').extract()
+        press['raw'] = response.text
+        press['url'] = response.url
+        yield press
