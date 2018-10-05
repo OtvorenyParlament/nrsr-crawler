@@ -118,3 +118,5 @@ SPLASH_COOKIES_DEBUG = True
 
 MONGO_DATABASE = 'nrsr'
 MONGO_URI = 'mongodb://localhost'
+MONGO_COL = 'crawled_data'
+MONGO_COL_ARCHIVE = 'archived_data'
