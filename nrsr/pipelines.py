@@ -35,7 +35,7 @@ class NrsrPipeline(object):
 
         col = self.db[self.mongo_col]
         item_type = item['type']
-        if item_type == 'club':
+        if item_type in ['club', 'press', 'session', 'member', 'member_change']:
             match_dict = {
                 'type': item_type,
                 'external_id': item['external_id'],

@@ -92,3 +92,14 @@ class ParliamentPressItem(scrapy.Item):
     attachments = scrapy.Field()
     raw = scrapy.Field()
     url = scrapy.Field(output_processor=TakeFirst())
+
+
+class SessionItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    name = scrapy.Field(output_processor=TakeFirst())
+    attachment_names = scrapy.Field()
+    attachments_urls = scrapy.Field()
+    attachments = scrapy.Field()
+    program_points = scrapy.Field()
+    period_num = scrapy.Field()
