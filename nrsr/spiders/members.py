@@ -5,9 +5,10 @@ Members
 from urllib.parse import urlparse, parse_qs
 import scrapy
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberItem
 
-class MembersSpider(scrapy.Spider):
+class MembersSpider(NRSRSpider):
     name = 'members'
     BASE_URL = 'https://www.nrsr.sk/web/'
 
@@ -20,7 +21,12 @@ class MembersSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        periods = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value').extract()
+        if self.period:
+            periods = [self.period]
+        else:
+            periods = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
+            ).extract()
         i = 0
         for period in periods:
             if i == 0:
@@ -44,7 +50,7 @@ class MembersSpider(scrapy.Spider):
                 },
                 callback=self.parse_list
             )
-    
+
     def parse_list(self, response):
         links = response.xpath(
             '//*[@id="_sectionLayoutContainer__panelContent"]/div/div/ul/li/a/@href').extract()

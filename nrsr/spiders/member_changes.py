@@ -8,10 +8,11 @@ import scrapy
 from scrapy_splash import SplashRequest
 from urllib.parse import urlencode, urlparse, parse_qs
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberChangeItem
 
 
-class MemberChangesSpider(scrapy.Spider):
+class MemberChangesSpider(NRSRSpider):
     name = 'member_changes'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
@@ -26,7 +27,12 @@ class MemberChangesSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        periods = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value').extract()
+        if self.period:
+            periods = [self.period]
+        else:
+            periods = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
+            ).extract()
         for period in periods:
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
@@ -47,7 +53,6 @@ class MemberChangesSpider(scrapy.Spider):
                 '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
                 '_sectionLayoutContainer$ctl00$_calendarMonth': '8',
                 '_sectionLayoutContainer$ctl00$_calendarApp': 'nrdvp',
-                '_searchText': '',
                 '_sectionLayoutContainer$ctl00$_calendarLang': '',
                 '_sectionLayoutContainer$ctl00$_monthSelector': '8',
                 '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
@@ -62,9 +67,12 @@ class MemberChangesSpider(scrapy.Spider):
             )
 
     def parse_pages(self, response):
-        pages = response.xpath(
-            '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href'
-        ).extract()
+        if self.daily:
+            pages = []
+        else:
+            pages = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href'
+            ).extract()
         pages = list(set(pages))
         period = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option[@selected="selected"]/@value'

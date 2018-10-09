@@ -5,9 +5,12 @@ Clubs crawler
 from urllib.parse import urlparse, parse_qs
 import scrapy
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import ClubItem, ClubMemberItem
 
-class ClubSpider(scrapy.Spider):
+
+class ClubSpider(NRSRSpider):
+
     name = 'clubs'
     BASE_URL = 'https://www.nrsr.sk/web/'
 
@@ -17,9 +20,12 @@ class ClubSpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.parse)
 
     def parse(self, response):
-        periods = response.xpath(
-            '//*/select[@id="_sectionLayoutContainer_ctl02__currentTerm"]/option/@value'
-        ).extract()
+        if self.period:
+            periods = [self.period]
+        else:
+            periods = response.xpath(
+                '//*/select[@id="_sectionLayoutContainer_ctl02__currentTerm"]/option/@value'
+            ).extract()
         i = 0
         for period in periods:
             meta = {'period_num': period}

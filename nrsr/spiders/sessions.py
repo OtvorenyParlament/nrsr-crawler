@@ -5,10 +5,11 @@ Parliament Sessions spider
 from urllib.parse import urlparse, parse_qs
 import scrapy
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberItem, SessionItem
 
 
-class SessionsSpider(scrapy.Spider):
+class SessionsSpider(NRSRSpider):
     name = 'sessions'
     BASE_URL = 'https://www.nrsr.sk/web/'
 
@@ -21,7 +22,12 @@ class SessionsSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        periods = response.xpath('//*/select[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value').extract()
+        if self.period:
+            periods = [self.period]
+        else:
+            periods = response.xpath(
+                '//*/select[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
+            ).extract()
         i = 0
         for period in periods:
             meta = {'period_num': period}

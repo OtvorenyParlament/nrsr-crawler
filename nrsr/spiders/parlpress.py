@@ -2,15 +2,17 @@
 Parliament Press Spider
 """
 
+from datetime import datetime, timedelta
 import re
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlencode, urlparse, parse_qs
 import scrapy
 from scrapy_splash import SplashRequest, SplashFormRequest
-from urllib.parse import urlencode, urlparse, parse_qs
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import ParliamentPressItem
 
-class PressSpider(scrapy.Spider):
+
+class PressSpider(NRSRSpider):
     name = 'parlpress'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
@@ -25,8 +27,11 @@ class PressSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        periods = response.xpath(
-            '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
+        if self.period:
+            periods = [self.period]
+        else:
+            periods = response.xpath(
+                '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
         for period in periods:
             if int(period) == 1:
                 continue
@@ -100,6 +105,11 @@ class PressSpider(scrapy.Spider):
                 print("{} already crawled".format(crawled_string))
                 continue
             cleaned_pages.append(page_match.groups()[0])
+        
+        if self.daily:
+            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
+        else:
+            date_from = ''
         for page in cleaned_pages:
             eventargument = page
             page_num = eventargument.split('$')[-1]
@@ -122,7 +132,7 @@ class PressSpider(scrapy.Spider):
                 '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
                 '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
-                '_sectionLayoutContainer$ctl01$DatumOd': '',
+                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
                 '_sectionLayoutContainer$ctl01$ctl00$txtDescriptorText': '',

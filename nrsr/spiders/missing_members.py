@@ -7,10 +7,11 @@ import scrapy
 from scrapy.utils.project import get_project_settings
 import pymongo
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberItem
 
 
-class MissingMembersSpider(scrapy.Spider):
+class MissingMembersSpider(NRSRSpider):
     # TODO: parse_member is redundant to members.parse_member
     name = 'missing_members'
     BASE_URL = 'https://www.nrsr.sk/web/'
