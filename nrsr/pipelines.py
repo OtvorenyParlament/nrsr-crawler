@@ -35,10 +35,38 @@ class NrsrPipeline(object):
 
         col = self.db[self.mongo_col]
         item_type = item['type']
-        if item_type in ['club', 'press', 'session', 'member', 'member_change']:
+        if item_type == 'member':
             match_dict = {
                 'type': item_type,
                 'external_id': item['external_id'],
+                'period_num': item['period_num']
+            }
+        elif item_type == 'member_change':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id'],
+                'period_num': item['period_num'],
+                'change_type': item['change_type'],
+                'date': item['date']
+            }
+        elif item_type == 'press':
+            match_dict = {
+                'type': item_type,
+                'num': item['num'],
+                'period_num': item['period_num']
+            }
+
+        elif item_type == 'session':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id'],
+                'period_num': item['period_num'],
+            }
+        elif item_type == 'club':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id'],
+                'period_num': item['period_num']
             }
         else:
             raise Exception("unknown type {}".format(item['type']))
