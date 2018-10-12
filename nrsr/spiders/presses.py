@@ -13,7 +13,7 @@ from nrsr.items import ParliamentPressItem
 
 
 class PressSpider(NRSRSpider):
-    name = 'parlpress'
+    name = 'presses'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
 
