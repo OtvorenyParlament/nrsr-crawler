@@ -103,3 +103,4 @@ class SessionItem(scrapy.Item):
     attachments = scrapy.Field()
     program_points = scrapy.Field()
     period_num = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())

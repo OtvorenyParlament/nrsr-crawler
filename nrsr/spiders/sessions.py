@@ -23,7 +23,7 @@ class SessionsSpider(NRSRSpider):
 
     def parse(self, response):
         if self.period:
-            periods = [self.period]
+            periods = [str(self.period)]
         else:
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
@@ -77,6 +77,7 @@ class SessionsSpider(NRSRSpider):
             '//*[@id="_sectionLayoutContainer_ctl01__Caption"]/text()').extract_first()
         item['attachments_urls'] = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__programDocumentPanel"]/a/@href').extract()
+        item['url'] = response.url
         attachments = []
         for x in response.xpath('//*[@id="_sectionLayoutContainer_ctl01__programDocumentPanel"]/a'):
             attachments.append({
