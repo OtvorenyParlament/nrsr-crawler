@@ -99,7 +99,7 @@ class SessionsSpider(NRSRSpider):
                 p_state = None
             try:
                 p_progpoint = row.xpath('td[2]/text()').extract()[0].replace(
-                    '\xfd', '').strip()
+                    '\xfd', '').strip().replace('.', '')
             except:
                 p_progpoint = None
             try:
@@ -108,15 +108,23 @@ class SessionsSpider(NRSRSpider):
             except:
                 p_parlpress = None
             try:
-                p_text = ' '.join(row.xpath('td[4]/text()').extract()).strip()
+                p_text1 = ' '.join(row.xpath('td[4]/strong/text()').extract()).strip()
             except:
-                p_text = None
+                p_text1 = None
+            try:
+                p_text2 = ' '.join(row.xpath('td[4]/i/text()').extract()).strip()
+            except:
+                p_text2 = None
+            try:
+                p_text3 = ' '.join([x.strip() for x in row.xpath('td[4]/text()').extract()]).strip()
+            except:
+                p_text3 = None
             program_points.append({
                 'state': p_state,
                 'progpoint': p_progpoint,
                 'parlpress': p_parlpress,
                 'parlpress_url': p_url,
-                'text': p_text
+                'text': [p_text1, p_text2, p_text3]
             })
         item['program_points'] = program_points
         yield item
