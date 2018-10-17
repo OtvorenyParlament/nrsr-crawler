@@ -21,7 +21,7 @@ class ClubItem(scrapy.Item):
     email = scrapy.Field(output_processor=TakeFirst())
     period_num = scrapy.Field(output_processor=TakeFirst())
     members = scrapy.Field()
-    url = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
 
 
 class ClubMemberItem(scrapy.Item):
