@@ -120,7 +120,7 @@ class VotingItem(scrapy.Item):
     press_url = scrapy.Field(output_processor=TakeFirst())
     result = scrapy.Field(output_processor=TakeFirst())
     votes = scrapy.Field()
-    url = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
 
 class VotingVoteItem(scrapy.Item):
     external_id = scrapy.Field()

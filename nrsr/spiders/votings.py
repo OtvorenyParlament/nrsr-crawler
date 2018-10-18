@@ -153,9 +153,11 @@ class VotingSpider(NRSRSpider):
             )
         items = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultGrid2"]/tbody/tr[position()>1 and position()<last()]')
         for item in items:
-            press_num = item.xpath('td[3]/a/text()').extract_first()
-            press_url = item.xpath('td[3]/a/@href').extract_first()
-            item_url = item.xpath('td[6]/a/@href').extract_first()
+            press_num = item.xpath('td[4]/a/text()').extract_first()
+            if press_num:
+                press_num = re.search(r'(\d+)', press_num).groups()[0]
+            press_url = item.xpath('td[4]/a/@href').extract_first()
+            item_url = item.xpath('td[3]/a/@href').extract_first()
             if item_url:
                 url = '{}{}'.format(self.BASE_URL, item_url)
                 yield scrapy.Request(
@@ -183,11 +185,15 @@ class VotingSpider(NRSRSpider):
         ).extract_first().strip()
         voting.add_value('datetime',
                          datetime.strptime(dstring, '%d. %m. %Y %H:%M'))
+        session_num = response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__schodzaLink"]/text()'
+            ).extract_first().strip()
+        if session_num:
+            session_num = re.search(r'(\d+)', session_num).groups()[0]
         voting.add_value(
             'session_num',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__schodzaLink"]/text()'
-            ).extract_first())
+            session_num
+            )
         voting.add_value(
             'voting_num',
             response.xpath(
