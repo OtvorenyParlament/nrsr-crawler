@@ -30,7 +30,7 @@ class VotingSpider(NRSRSpider):
 
     def parse(self, response):
         if self.period:
-            periods = [self.period]
+            periods = [str(self.period)]
         else:
             periods = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__termNrCombo"]/option/@value').extract()
         if self.daily:
@@ -157,7 +157,7 @@ class VotingSpider(NRSRSpider):
             if press_num:
                 press_num = re.search(r'(\d+)', press_num).groups()[0]
             press_url = item.xpath('td[4]/a/@href').extract_first()
-            item_url = item.xpath('td[3]/a/@href').extract_first()
+            item_url = item.xpath('td[6]/a/@href').extract_first()
             if item_url:
                 url = '{}{}'.format(self.BASE_URL, item_url)
                 yield scrapy.Request(
