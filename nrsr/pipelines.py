@@ -68,6 +68,14 @@ class NrsrPipeline(object):
                 'external_id': item['external_id'],
                 'period_num': item['period_num']
             }
+        elif item_type == 'voting':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id'],
+                'period_num': item['period_num'],
+            }
+            if 'press_num' in item:
+                match_dict['press_num'] = item['press_num']
         else:
             raise Exception("unknown type {}".format(item['type']))
 

@@ -14,6 +14,10 @@ def filter_mailto(value):
     return value.replace('mailto:', '')    
 
 
+def filter_vote(value):
+    return value.strip()[1:-1]
+
+
 class ClubItem(scrapy.Item):
     type = scrapy.Field(output_processor=TakeFirst())
     external_id = scrapy.Field(output_processor=TakeFirst())
@@ -90,7 +94,6 @@ class ParliamentPressItem(scrapy.Item):
     attachments_names = scrapy.Field()
     attachments_urls = scrapy.Field()
     attachments = scrapy.Field()
-    raw = scrapy.Field()
     url = scrapy.Field(output_processor=TakeFirst())
 
 
@@ -104,3 +107,24 @@ class SessionItem(scrapy.Item):
     program_points = scrapy.Field()
     period_num = scrapy.Field()
     url = scrapy.Field(output_processor=TakeFirst())
+
+class VotingItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    topic = scrapy.Field(output_processor=TakeFirst())
+    datetime = scrapy.Field(output_processor=TakeFirst())
+    session_num = scrapy.Field(output_processor=TakeFirst())
+    voting_num = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    press_num = scrapy.Field(output_processor=TakeFirst())
+    press_url = scrapy.Field(output_processor=TakeFirst())
+    result = scrapy.Field(output_processor=TakeFirst())
+    votes = scrapy.Field()
+    url = scrapy.Field()
+
+class VotingVoteItem(scrapy.Item):
+    external_id = scrapy.Field()
+    vote = scrapy.Field(
+        input_processor=MapCompose(filter_vote),
+        output_processor=Join()
+    )

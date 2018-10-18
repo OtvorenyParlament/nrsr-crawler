@@ -21,7 +21,7 @@ class ClubSpider(NRSRSpider):
 
     def parse(self, response):
         if self.period:
-            periods = [self.period]
+            periods = [str(self.period)]
         else:
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl02__currentTerm"]/option/@value'

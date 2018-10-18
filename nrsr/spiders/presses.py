@@ -32,6 +32,10 @@ class PressSpider(NRSRSpider):
         else:
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
+        if self.daily:
+            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
+        else:
+            date_from = ''
         for period in periods:
             if int(period) == 1:
                 continue
@@ -55,7 +59,7 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
                 '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
-                '_sectionLayoutContainer$ctl01$DatumOd': '',
+                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
                 '_sectionLayoutContainer$ctl01$cmdSearch': 'Vyhľadať',
@@ -145,15 +149,12 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
             }
             yield SplashRequest(
-                # response.url,
                 '{}{}'.format(self.BASE_URL, post_action),
                 self.parse_pages,
                 args={
                     'http_method': 'POST',
-                    # 'url': response.meta['url'],
                     'body': urlencode(body),
                 },
-                # meta=meta,
                 meta={'page': True}
             )
 
@@ -204,6 +205,5 @@ class PressSpider(NRSRSpider):
         press['attachments_names'] = attachments
         press['attachments_urls'] = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[5]/span/a/@href').extract()
-        press['raw'] = response.text
         press['url'] = response.url
         yield press
