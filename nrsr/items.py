@@ -33,6 +33,13 @@ class ClubMemberItem(scrapy.Item):
     membership = scrapy.Field()
 
 
+class DailyClubItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    date = scrapy.Field(output_processor=TakeFirst())
+    clubs = scrapy.Field()
+
+
 class MemberItem(scrapy.Item):
     type = scrapy.Field(output_processor=TakeFirst())
     external_id = scrapy.Field(output_processor=TakeFirst())

@@ -76,6 +76,12 @@ class NrsrPipeline(object):
             }
             if 'press_num' in item:
                 match_dict['press_num'] = item['press_num']
+        elif item_type == 'daily_club':
+            match_dict = {
+                'type': item_type,
+                'period_num': item['period_num'],
+                'date': item['date']
+            }
         else:
             raise Exception("unknown type {}".format(item['type']))
 

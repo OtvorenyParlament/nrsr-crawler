@@ -12,7 +12,7 @@ from scrapy.shell import inspect_response
 from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
-from nrsr.items import VotingItem, VotingVoteItem
+from nrsr.items import VotingItem, VotingVoteItem, DailyClubItem
 
 
 class VotingSpider(NRSRSpider):
@@ -173,6 +173,7 @@ class VotingSpider(NRSRSpider):
     def parse_voting(self, response):
         voting = scrapy.loader.ItemLoader(item=VotingItem())
         voting.add_value('type', 'voting')
+        period_num = response.meta['period_num']
         url_parsed = urlparse(response.url)
         voting.add_value('external_id', parse_qs(url_parsed.query)['ID'][0])
         voting.add_value(
@@ -204,12 +205,13 @@ class VotingSpider(NRSRSpider):
             response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01_ctl00__votingResultCell"]/span/text()'
             ).extract_first())
-        voting.add_value('period_num', response.meta['period_num'])
+        voting.add_value('period_num', period_num)
         voting.add_value('press_num', response.meta['press_num'])
         voting.add_value('press_url', response.meta['press_url'])
         voting.add_value('url', response.url)
         voting_votes = []
         votes = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultsTable"]/tr/td[not(@class)]')
+
         for vote in votes:
             voted = VotingVoteItem()
             vote_value = vote.xpath('text()').extract_first()
@@ -224,3 +226,29 @@ class VotingSpider(NRSRSpider):
             voting_votes.append(voted)
         voting.add_value('votes', voting_votes)
         yield voting.load_item()
+
+        # daily club
+        daily_club = scrapy.loader.ItemLoader(item=DailyClubItem())
+        daily_club.add_value('type', 'daily_club')
+        daily_club.add_value('period_num', period_num)
+        daily_club.add_value('date', datetime.utcnow().strftime('%Y-%m-%d'))
+        daily_clubs = {}
+        daily_club_votes = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultsTable"]/tr/td')
+        current_club = None
+        for vote in daily_club_votes:
+            if 'class' in vote.root.attrib and vote.root.attrib['class'] == 'hpo_result_block_title':
+                current_club = vote.xpath('text()').extract_first()
+                if current_club not in daily_clubs:
+                    daily_clubs[current_club] = []
+                continue
+            voter_url = vote.xpath('a/@href').extract_first()
+            if voter_url is None:
+                continue
+            if not current_club:
+                continue
+            url_parsed = urlparse(voter_url)
+            member_external_id = parse_qs(url_parsed.query)['PoslanecID'][0]
+            daily_clubs[current_club].append(member_external_id)
+        daily_club.add_value('clubs', daily_clubs)
+        yield daily_club.load_item()
+
