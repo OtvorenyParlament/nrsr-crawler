@@ -195,11 +195,13 @@ class VotingSpider(NRSRSpider):
             'session_num',
             session_num
             )
+        voting_num = response.xpath(
+                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div/div[3]/span/text()'
+            ).extract_first().strip()
         voting.add_value(
             'voting_num',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div/div[3]/span/text()'
-            ).extract_first().strip())
+            voting_num,
+            )
         voting.add_value(
             'result',
             response.xpath(
@@ -231,7 +233,7 @@ class VotingSpider(NRSRSpider):
         daily_club = scrapy.loader.ItemLoader(item=DailyClubItem())
         daily_club.add_value('type', 'daily_club')
         daily_club.add_value('period_num', period_num)
-        daily_club.add_value('date', datetime.utcnow().strftime('%Y-%m-%d'))
+        daily_club.add_value('date', datetime.strptime(dstring, '%d. %m. %Y %H:%M').strftime('%Y-%m-%d'))
         daily_clubs = {}
         daily_club_votes = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultsTable"]/tr/td')
         current_club = None
@@ -249,6 +251,7 @@ class VotingSpider(NRSRSpider):
             url_parsed = urlparse(voter_url)
             member_external_id = parse_qs(url_parsed.query)['PoslanecID'][0]
             daily_clubs[current_club].append(member_external_id)
-        daily_club.add_value('clubs', daily_clubs)
+        transformed_clubs = [[k, v] for (k, v) in daily_clubs.items()]
+        daily_club.add_value('clubs', transformed_clubs)
         yield daily_club.load_item()
 
