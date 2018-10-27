@@ -233,7 +233,8 @@ class VotingSpider(NRSRSpider):
         daily_club = scrapy.loader.ItemLoader(item=DailyClubItem())
         daily_club.add_value('type', 'daily_club')
         daily_club.add_value('period_num', period_num)
-        daily_club.add_value('date', datetime.strptime(dstring, '%d. %m. %Y %H:%M').strftime('%Y-%m-%d'))
+        daily_club.add_value('date', datetime.strptime(
+            dstring, '%d. %m. %Y %H:%M').replace(hour=12, minute=0, second=0, microsecond=0))
         daily_clubs = {}
         daily_club_votes = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultsTable"]/tr/td')
         current_club = None
