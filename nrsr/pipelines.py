@@ -82,6 +82,18 @@ class NrsrPipeline(object):
                 'period_num': item['period_num'],
                 'date': item['date']
             }
+        elif item_type == 'bill':
+            match_dict = {
+                'type': item_type,
+                'period_num': item['period_num'],
+                'external_id': item['external_id']
+            }
+        elif item_type == 'bill_step':
+            match_dict = {
+                'type': item_type,
+                'bill_id': item['bill_id'],
+                'external_id': item['external_id']
+            }
         else:
             raise Exception("unknown type {}".format(item['type']))
 

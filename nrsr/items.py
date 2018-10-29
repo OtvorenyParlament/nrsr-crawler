@@ -135,3 +135,47 @@ class VotingVoteItem(scrapy.Item):
         input_processor=MapCompose(filter_vote),
         output_processor=Join()
     )
+
+
+class BillItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    proposer = scrapy.Field(output_processor=TakeFirst())
+    delivered = scrapy.Field(output_processor=TakeFirst())
+    press_num = scrapy.Field(output_processor=TakeFirst())
+    current_state = scrapy.Field(output_processor=TakeFirst())
+    current_result = scrapy.Field(output_processor=TakeFirst())
+    url = scrapy.Field(output_processor=TakeFirst())
+
+
+class BillStepItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    step_type = scrapy.Field(output_processor=TakeFirst())
+    changes = scrapy.Field()
+    bill_id = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    main_label = scrapy.Field()
+    body_label = scrapy.Field()
+    meeting_panel = scrapy.Field()
+    meeting_session_num = scrapy.Field()
+    meeting_resolution = scrapy.Field()
+    committees_label = scrapy.Field()
+    slk_label = scrapy.Field()
+    coordinator_label = scrapy.Field()
+    coordinator_meeting_date = scrapy.Field()
+    coordinator_name = scrapy.Field()
+    step_result = scrapy.Field()
+    discussed_label = scrapy.Field()
+    sent_standpoint = scrapy.Field()
+    sent_label = scrapy.Field()
+    act_num_label = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
+
+
+class BillStepChangeItem(scrapy.Item):
+    date = scrapy.Field()
+    author = scrapy.Field()
+    detail = scrapy.Field()
+    attachment_title = scrapy.Field()
+    attachment_url = scrapy.Field()
