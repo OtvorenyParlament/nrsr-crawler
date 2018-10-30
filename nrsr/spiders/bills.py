@@ -106,7 +106,10 @@ class BillsSpider(NRSRSpider):
         item.add_value('period_num', response.meta['period_num'])
         item.add_value('url', response.url)
         item.add_value('proposer', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__NavrhovatelLabel"]/text()').extract_first())
-        item.add_value('delivered', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumDoruceniaLabel"]/text()').extract_first())
+        delivered = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumDoruceniaLabel"]/text()').extract_first()
+        if delivered:
+            delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+        item.add_value('delivered', delivered)
         item.add_value('press_num', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()').extract_first())
         item.add_value('current_state', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__ProcessStateLabel"]/text()').extract_first())
         item.add_value('current_result', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__CurrentResultLabel"]/text()').extract_first())
@@ -147,7 +150,9 @@ class BillsSpider(NRSRSpider):
 
         coordinator_meeting_date = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumPrerokovaniaLabel"]/text()').extract_first()
         if coordinator_meeting_date:
-            coordinator_name = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GVNameLabel"]/text()').extract_first()
+            coordinator_name = datetime.strptime(
+                response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GVNameLabel"]/text()').extract_first(),
+                '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
         else:
             coordinator_name = None
     
@@ -163,7 +168,9 @@ class BillsSpider(NRSRSpider):
             rows = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__PdnList__pdnListPanel"]/table/tr')
             for row in rows:
                 change = BillStepChangeItem()
-                change['date'] = row.xpath('td[1]/text()').extract_first()
+                change['date'] = datetime.strptime(
+                    row.xpath('td[1]/text()').extract_first(),
+                    '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
                 change['author'] = row.xpath('td[2]/text()').extract_first()
                 change['detail'] = row.xpath('td[3]/a/@href').extract_first()
                 change['attachment_title'] = row.xpath('td[4]/a/text()').extract_first()
