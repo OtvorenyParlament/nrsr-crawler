@@ -113,7 +113,7 @@ class BillsSpider(NRSRSpider):
         item.add_value('press_num', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()').extract_first())
         item.add_value('current_state', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__ProcessStateLabel"]/text()').extract_first())
         item.add_value('current_result', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__CurrentResultLabel"]/text()').extract_first())
-
+        item.add_value('category_name', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CategoryNameLabel"]/text()').extract_first())
 
         graph_detail = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__LegProcesDiagramLink"]/@href').extract_first()
         if graph_detail:

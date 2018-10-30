@@ -146,6 +146,7 @@ class BillItem(scrapy.Item):
     press_num = scrapy.Field(output_processor=TakeFirst())
     current_state = scrapy.Field(output_processor=TakeFirst())
     current_result = scrapy.Field(output_processor=TakeFirst())
+    category_name = scrapy.Field(output_processor=TakeFirst())
     url = scrapy.Field(output_processor=TakeFirst())
 
 
