@@ -2,6 +2,7 @@
 Member Changes
 """
 
+from datetime import datetime
 import re
 from urllib.parse import urlencode, urlparse, parse_qs
 import scrapy
@@ -147,7 +148,9 @@ class MemberChangesSpider(NRSRSpider):
                              parse_qs(url_parsed.query)['PoslanecID'][0])
             change.add_value('type', 'member_change')
             change.add_value('date',
-                             item.xpath('td[1]/text()').extract_first())
+                             datetime.strptime(item.xpath('td[1]/text()').extract_first(),
+                             '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+            )
             change.add_value('period_num', period)
             change.add_value('change_type',
                              item.xpath('td[3]/text()').extract_first())

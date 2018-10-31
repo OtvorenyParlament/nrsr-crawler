@@ -26,9 +26,10 @@ class BillsSpider(NRSRSpider):
 
     def parse(self, response):
         if self.period:
-            periods = [str(self.period)]
+            periods = [self.period]
         else:
             periods = response.xpath('//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
+            periods = list(map(int, periods))
 
         if self.daily:
             date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
