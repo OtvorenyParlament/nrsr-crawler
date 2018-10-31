@@ -90,10 +90,10 @@ class MemberChangeItem(scrapy.Item):
     change_reason = scrapy.Field(output_processor=TakeFirst())
 
 
-class ParliamentPressItem(scrapy.Item):
+class PressItem(scrapy.Item):
     type = scrapy.Field()
     title = scrapy.Field()
-    num = scrapy.Field()
+    press_num = scrapy.Field()
     group_num = scrapy.Field()
     period_num = scrapy.Field()
     press_type = scrapy.Field()

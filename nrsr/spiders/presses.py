@@ -9,7 +9,7 @@ import scrapy
 from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
-from nrsr.items import ParliamentPressItem
+from nrsr.items import PressItem
 
 
 class PressSpider(NRSRSpider):
@@ -170,7 +170,7 @@ class PressSpider(NRSRSpider):
                 )
 
     def parse_press(self, response):
-        press = ParliamentPressItem()
+        press = PressItem()
         press['period_num'] = response.meta['period_num']
         press['type'] = 'press'
         try:
@@ -179,10 +179,10 @@ class PressSpider(NRSRSpider):
         except KeyError:
             press['title'] = None
         try:
-            press['num'] = response.xpath(
+            press['press_num'] = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[1]/span/text()').extract_first().strip()
         except KeyError:
-            press['num'] = None
+            press['press_num'] = None
         try:
             press['press_type'] = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[2]/span/text()').extract_first().strip()
@@ -190,7 +190,7 @@ class PressSpider(NRSRSpider):
             press['press_type'] = None
         try:
             press['date'] = response.xpath(
-                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()').extract_first().strip()
+                '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()').extract_first().strip().strptime('%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
         except KeyError:
             press['date'] = None
         press['attachments_names'] = response.xpath(
