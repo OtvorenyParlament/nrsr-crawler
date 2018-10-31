@@ -62,11 +62,11 @@ class MissingPressSpider(scrapy.Spider):
         except KeyError:
             press['title'] = None
         try:
-            press['num'] = response.xpath(
+            press['press_num'] = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[1]/span/text()'
             ).extract_first().strip()
         except KeyError:
-            press['num'] = None
+            press['press_num'] = None
         try:
             press['press_type'] = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[2]/span/text()'

@@ -74,7 +74,7 @@ class ClubSpider(NRSRSpider):
         url_parsed = urlparse(response.url)
         club.add_value('type', 'club')
         club.add_value('period_num', response.meta['period_num'])
-        club.add_value('external_id', parse_qs(url_parsed.query)['ID'])
+        club.add_value('external_id', int(parse_qs(url_parsed.query)['ID']))
         club.add_value('url', response.url)
         club.add_value('name',
                        response.xpath('//*/h1/text()').extract_first().strip())
@@ -96,7 +96,7 @@ class ClubSpider(NRSRSpider):
                 href = member.xpath(
                     'div[@class="member_name"]/a/@href').extract_first()
                 parsed_qs = parse_qs(href)
-                club_member['external_id'] = parsed_qs['PoslanecID'][0]
+                club_member['external_id'] = int(parsed_qs['PoslanecID'][0])
                 club_member['membership'] = member.xpath(
                     'div[@class="member_name"]/span/text()').extract_first(
                     ).strip()
@@ -109,7 +109,7 @@ class ClubSpider(NRSRSpider):
                 club_member = ClubMemberItem()
                 href = member.xpath('td[1]/a/@href').extract_first()
                 parsed_qs = parse_qs(href)
-                club_member['external_id'] = parsed_qs['PoslanecID'][0]
+                club_member['external_id'] = int(parsed_qs['PoslanecID'][0])
                 club_member['membership'] = member.xpath(
                     'td[2]/text()').extract_first().strip()
 

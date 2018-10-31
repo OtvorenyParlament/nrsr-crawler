@@ -173,7 +173,7 @@ class VotingSpider(NRSRSpider):
         voting.add_value('type', 'voting')
         period_num = response.meta['period_num']
         url_parsed = urlparse(response.url)
-        voting.add_value('external_id', parse_qs(url_parsed.query)['ID'][0])
+        voting.add_value('external_id', int(parse_qs(url_parsed.query)['ID'][0]))
         voting.add_value(
             'topic',
             response.xpath(
@@ -222,7 +222,7 @@ class VotingSpider(NRSRSpider):
             if voted_url is None:
                 continue
             url_parsed = urlparse(voted_url)
-            voted['external_id'] = parse_qs(url_parsed.query)['PoslanecID'][0]
+            voted['external_id'] = int(parse_qs(url_parsed.query)['PoslanecID'][0])
             voting_votes.append(voted)
         voting.add_value('votes', voting_votes)
         yield voting.load_item()
@@ -248,7 +248,7 @@ class VotingSpider(NRSRSpider):
             if not current_club:
                 continue
             url_parsed = urlparse(voter_url)
-            member_external_id = parse_qs(url_parsed.query)['PoslanecID'][0]
+            member_external_id = int(parse_qs(url_parsed.query)['PoslanecID'][0])
             daily_clubs[current_club].append(member_external_id)
         transformed_clubs = [[k, v] for (k, v) in daily_clubs.items()]
         daily_club.add_value('clubs', transformed_clubs)

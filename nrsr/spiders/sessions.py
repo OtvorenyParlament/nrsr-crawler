@@ -73,7 +73,7 @@ class SessionsSpider(NRSRSpider):
         url_parsed = urlparse(response.url)
         item['type'] = 'session'
         item['period_num'] = response.meta['period_num']
-        item['external_id'] = parse_qs(url_parsed.query)['ID'][0]
+        item['external_id'] = int(parse_qs(url_parsed.query)['ID'][0])
         item['name'] = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__Caption"]/text()').extract_first()
         item['attachments_urls'] = response.xpath(

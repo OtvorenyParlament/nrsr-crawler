@@ -101,7 +101,7 @@ class BillsSpider(NRSRSpider):
     def parse_item(self, response):
         url_parsed = urlparse(response.url)
         url_qs = parse_qs(url_parsed.query)
-        bill_id = url_qs['MasterID'][0]
+        bill_id = int(url_qs['MasterID'][0])
         item = scrapy.loader.ItemLoader(item=BillItem())
         item.add_value('type', 'bill')
         item.add_value('external_id', bill_id)
@@ -154,8 +154,8 @@ class BillsSpider(NRSRSpider):
     def parse_step(self, response):
         url_parsed = urlparse(response.url)
         url_qs = parse_qs(url_parsed.query)
-        bill_id = url_qs['MasterID'][0]
-        external_id = url_qs['WorkitemID'][0]
+        bill_id = int(url_qs['MasterID'][0])
+        external_id = int(url_qs['WorkitemID'][0])
         main_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__MainLabel"]/text()').extract_first()
         body_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__BodyPanel"]/h2/text()').extract_first()
 

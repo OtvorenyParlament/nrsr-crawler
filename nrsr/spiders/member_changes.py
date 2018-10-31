@@ -145,7 +145,7 @@ class MemberChangesSpider(NRSRSpider):
             change = scrapy.loader.ItemLoader(item=MemberChangeItem())
             url_parsed = urlparse(item.xpath('td[2]/a/@href').extract_first())
             change.add_value('external_id',
-                             parse_qs(url_parsed.query)['PoslanecID'][0])
+                             int(parse_qs(url_parsed.query)['PoslanecID'][0]))
             change.add_value('type', 'member_change')
             change.add_value('date',
                              datetime.strptime(item.xpath('td[1]/text()').extract_first(),

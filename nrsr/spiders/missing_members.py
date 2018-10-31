@@ -52,9 +52,9 @@ class MissingMembersSpider(NRSRSpider):
         panel_content = '[@id="_sectionLayoutContainer__panelContent"]'
 
         item.add_value('type', 'member')
-        item.add_value('external_id', parse_qs(url_parsed.query)['PoslanecID'][0])
+        item.add_value('external_id', int(parse_qs(url_parsed.query)['PoslanecID'][0]))
         try:
-            item.add_value('period_num', parse_qs(url_parsed.query)['CisObdobia'][0])
+            item.add_value('period_num', int(parse_qs(url_parsed.query)['CisObdobia'][0]))
         except:
             pass
         item.add_value('url', response.url)
