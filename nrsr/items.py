@@ -53,10 +53,7 @@ class MemberItem(scrapy.Item):
         input_processor=MapCompose(filter_whitespaces),
         output_processor=TakeFirst()
     )
-    born = scrapy.Field(
-        input_processor=MapCompose(filter_whitespaces),
-        output_processor=Join()
-    )
+    born = scrapy.Field(output_processor=TakeFirst())
     nationality = scrapy.Field(
         input_processor=MapCompose(filter_whitespaces),
         output_processor=Join()
