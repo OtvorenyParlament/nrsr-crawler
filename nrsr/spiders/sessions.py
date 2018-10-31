@@ -6,7 +6,7 @@ from urllib.parse import urlparse, parse_qs
 import scrapy
 
 from nrsr.nrsr_spider import NRSRSpider
-from nrsr.items import MemberItem, SessionItem
+from nrsr.items import SessionItem
 
 
 class SessionsSpider(NRSRSpider):

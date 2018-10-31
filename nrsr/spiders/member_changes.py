@@ -3,10 +3,9 @@ Member Changes
 """
 
 import re
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlencode, urlparse, parse_qs
 import scrapy
 from scrapy_splash import SplashRequest
-from urllib.parse import urlencode, urlparse, parse_qs
 
 from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberChangeItem
@@ -80,11 +79,8 @@ class MemberChangesSpider(NRSRSpider):
         current_page = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
         ).extract()
-        crapa = False
         if current_page[0].isdigit():
             crawled_string = '{}_{}'.format(period, current_page[0])
-            if crawled_string in self.crawled_pages:
-                crapa = True
         for page in pages:
             page_match = re.match(r'.*(Page.*[0-9]).*', page)
             if not page_match:
@@ -139,7 +135,7 @@ class MemberChangesSpider(NRSRSpider):
                 },
                 # meta=meta,
                 meta={'page': True})
-        # if not crapa:
+
         items = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[@class="tab_zoznam_alt" or @class="tab_zoznam_nonalt"]'
         )

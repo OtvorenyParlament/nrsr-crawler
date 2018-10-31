@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import re
 from urllib.parse import urlencode, urlparse, parse_qs
 import scrapy
-from scrapy_splash import SplashRequest, SplashFormRequest
+from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import ParliamentPressItem
@@ -160,7 +160,6 @@ class PressSpider(NRSRSpider):
 
         items = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[position()>1]')
         for item in items:
-            press_num = item.xpath('td[1]/a/text()').extract_first()
             press_url = item.xpath('td[1]/a/@href').extract_first()
             if press_url:
                 url = '{}{}'.format(self.BASE_URL, press_url)

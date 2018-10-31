@@ -3,12 +3,9 @@ Votings and votes spider
 """
 
 from datetime import datetime, timedelta
-import json
 import re
 from urllib.parse import urlencode, urlparse, parse_qs
 import scrapy
-from scrapy.http.headers import Headers
-from scrapy.shell import inspect_response
 from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
@@ -255,4 +252,3 @@ class VotingSpider(NRSRSpider):
         transformed_clubs = [[k, v] for (k, v) in daily_clubs.items()]
         daily_club.add_value('clubs', transformed_clubs)
         yield daily_club.load_item()
-

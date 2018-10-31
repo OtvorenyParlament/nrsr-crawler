@@ -7,7 +7,7 @@ from copy import deepcopy
 import pymongo
 
 
-class NrsrPipeline(object):
+class NrsrPipeline:
 
     def __init__(self, mongo_uri, mongo_db, mongo_col, mongo_col_archive):
         self.mongo_uri = mongo_uri

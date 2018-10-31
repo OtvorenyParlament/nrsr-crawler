@@ -2,13 +2,11 @@
 Pull missing press represented in votings but not in press list
 """
 
-import re
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import urlparse
 
 import pymongo
 import scrapy
 from scrapy.utils.project import get_project_settings
-from scrapy_splash import SplashFormRequest, SplashRequest
 
 from nrsr.items import ParliamentPressItem
 

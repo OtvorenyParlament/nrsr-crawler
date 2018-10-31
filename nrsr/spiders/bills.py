@@ -3,7 +3,6 @@ Bills spider
 """
 
 from datetime import datetime, timedelta
-import re
 from urllib.parse import urlparse, parse_qs, urlencode
 
 import scrapy
@@ -88,7 +87,9 @@ class BillsSpider(NRSRSpider):
         period = response.meta['period_num']
 
         # items
-        items = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_dgResult"]/tbody/tr[contains(@class, "odd") or contains(@class, "even")]/td[1]/a/@href').extract()
+        items = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01_dgResult"]/tbody/tr[contains(@class, "odd") or contains(@class, "even")]/td[1]/a/@href'
+        ).extract()
         for item in items:
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, item),
@@ -105,15 +106,38 @@ class BillsSpider(NRSRSpider):
         item.add_value('external_id', bill_id)
         item.add_value('period_num', response.meta['period_num'])
         item.add_value('url', response.url)
-        item.add_value('proposer', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__NavrhovatelLabel"]/text()').extract_first())
-        delivered = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumDoruceniaLabel"]/text()').extract_first()
+        item.add_value(
+            'proposer',
+            response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__NavrhovatelLabel"]/text()'
+            ).extract_first())
+        delivered = response.xpath(
+            '//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumDoruceniaLabel"]/text()'
+        ).extract_first()
         if delivered:
-            delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+            delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(
+                hour=12, minute=0, second=0, microsecond=0)
         item.add_value('delivered', delivered)
-        item.add_value('press_num', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()').extract_first())
-        item.add_value('current_state', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__ProcessStateLabel"]/text()').extract_first())
-        item.add_value('current_result', response.xpath('//*[@id="_sectionLayoutContainer_ctl01__CurrentResultLabel"]/text()').extract_first())
-        item.add_value('category_name', response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CategoryNameLabel"]/text()').extract_first())
+        item.add_value(
+            'press_num',
+            response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()'
+            ).extract_first())
+        item.add_value(
+            'current_state',
+            response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__ProcessStateLabel"]/text()'
+            ).extract_first())
+        item.add_value(
+            'current_result',
+            response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01__CurrentResultLabel"]/text()'
+            ).extract_first())
+        item.add_value(
+            'category_name',
+            response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__CategoryNameLabel"]/text()'
+            ).extract_first())
 
         graph_detail = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__LegProcesDiagramLink"]/@href').extract_first()
         if graph_detail:
@@ -146,7 +170,7 @@ class BillsSpider(NRSRSpider):
         slk_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__SlkLabel"]/text()').extract()
         coordinator_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GestorskyVyborLabel"]/text()').extract_first()
         step_result = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__ResultLabel"]/text()').extract_first()
-        
+
 
         coordinator_meeting_date = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumPrerokovaniaLabel"]/text()').extract_first()
         if coordinator_meeting_date:
@@ -155,7 +179,7 @@ class BillsSpider(NRSRSpider):
                 '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
         else:
             coordinator_name = None
-    
+
         discussed_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__PrerokovanyLabel"]/text()').extract_first()
         sent_standpoint = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__ZaslaneStanoviskoLabel"]/text()').extract_first()
 

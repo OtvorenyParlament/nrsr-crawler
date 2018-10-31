@@ -89,7 +89,7 @@ class ClubSpider(NRSRSpider):
         found_members = response.xpath(
             '//*[@id="_sectionLayoutContainer__panelContent"]/div[@class="member"]'
         )
-        if len(list(found_members)) > 0:
+        if list(found_members):
             for member in found_members:
                 club_member = ClubMemberItem()
                 href = member.xpath(
