@@ -121,9 +121,9 @@ class BillsSpider(NRSRSpider):
         item.add_value('delivered', delivered)
         item.add_value(
             'press_num',
-            response.xpath(
+            int(response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()'
-            ).extract_first())
+            ).extract_first()))
         item.add_value(
             'current_state',
             response.xpath(
@@ -161,7 +161,7 @@ class BillsSpider(NRSRSpider):
 
         meeting_panel = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__meetingPanel"]/text()').extract()
         if meeting_panel:
-            meeting_session_num = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CisSchodzeLabel"]/text()').extract_first()
+            meeting_session_num = int(response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__CisSchodzeLabel"]/text()').extract_first())
             meeting_resolution = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__UznesenieLabel"]/text()').extract_first()
         else:
             meeting_session_num = None

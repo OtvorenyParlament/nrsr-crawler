@@ -153,7 +153,7 @@ class VotingSpider(NRSRSpider):
         for item in items:
             press_num = item.xpath('td[4]/a/text()').extract_first()
             if press_num:
-                press_num = re.search(r'(\d+)', press_num).groups()[0]
+                press_num = int(re.search(r'(\d+)', press_num).groups()[0])
             press_url = item.xpath('td[4]/a/@href').extract_first()
             item_url = item.xpath('td[6]/a/@href').extract_first()
             if item_url:
@@ -188,14 +188,14 @@ class VotingSpider(NRSRSpider):
                 '//*[@id="_sectionLayoutContainer_ctl01_ctl00__schodzaLink"]/text()'
             ).extract_first().strip()
         if session_num:
-            session_num = re.search(r'(\d+)', session_num).groups()[0]
+            session_num = int(re.search(r'(\d+)', session_num).groups()[0])
         voting.add_value(
             'session_num',
             session_num
             )
-        voting_num = response.xpath(
+        voting_num = int(response.xpath(
                 '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div/div[3]/span/text()'
-            ).extract_first().strip()
+            ).extract_first().strip())
         voting.add_value(
             'voting_num',
             voting_num,

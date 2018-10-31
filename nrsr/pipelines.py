@@ -52,7 +52,7 @@ class NrsrPipeline:
         elif item_type == 'press':
             match_dict = {
                 'type': item_type,
-                'num': item['num'],
+                'press_num': item['press_num'],
                 'period_num': item['period_num']
             }
 

@@ -99,13 +99,13 @@ class SessionsSpider(NRSRSpider):
             except:
                 p_state = None
             try:
-                p_progpoint = row.xpath('td[2]/text()').extract()[0].replace(
-                    '\xfd', '').strip().replace('.', '')
+                p_progpoint = int(row.xpath('td[2]/text()').extract()[0].replace(
+                    '\xfd', '').strip().replace('.', ''))
             except:
                 p_progpoint = None
             try:
-                p_parlpress = row.xpath('td[3]/a/text()').extract()[0].replace(
-                    '\xfd', '').strip()
+                p_parlpress = int(row.xpath('td[3]/a/text()').extract()[0].replace(
+                    '\xfd', '').strip())
             except:
                 p_parlpress = None
             try:
