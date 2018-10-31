@@ -23,11 +23,12 @@ class SessionsSpider(NRSRSpider):
 
     def parse(self, response):
         if self.period:
-            periods = [str(self.period)]
+            periods = [self.period]
         else:
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
             ).extract()
+            periods = list(map(int, periods))
         i = 0
         for period in periods:
             meta = {'period_num': period}

@@ -32,6 +32,7 @@ class PressSpider(NRSRSpider):
         else:
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
+            periods = list(map(int, periods))
         if self.daily:
             date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
         else:
@@ -91,7 +92,7 @@ class PressSpider(NRSRSpider):
         post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
         url_parsed = urlparse(post_action)
         url_qs = parse_qs(url_parsed.query)
-        period = url_qs['CisObdobia'][0]
+        period = int(url_qs['CisObdobia'][0])
         current_page = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
         ).extract()

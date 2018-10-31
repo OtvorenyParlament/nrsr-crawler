@@ -8,7 +8,7 @@ import pymongo
 import scrapy
 from scrapy.utils.project import get_project_settings
 
-from nrsr.items import ParliamentPressItem
+from nrsr.items import PressItem
 
 
 class MissingPressSpider(scrapy.Spider):
@@ -43,14 +43,15 @@ class MissingPressSpider(scrapy.Spider):
         url_template = 'https://www.nrsr.sk/web/Default.aspx?sid=zakony/cpt&CisObdobia={period_num}&ID={external_id}'
 
         for item in missing:
+            period_num = int(item[0])
             yield scrapy.Request(
                 url=url_template.format(
-                    external_id=item[1], period_num=item[0]),
-                meta={'period_num': item[0]},
+                    external_id=item[1], period_num=period_num),
+                meta={'period_num': period_num},
                 callback=self.parse_press)
 
     def parse_press(self, response):
-        press = ParliamentPressItem()
+        press = PressItem()
         press['period_num'] = response.meta['period_num']
         press['type'] = 'press'
         try:

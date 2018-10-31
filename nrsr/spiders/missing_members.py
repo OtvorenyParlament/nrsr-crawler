@@ -41,7 +41,7 @@ class MissingMembersSpider(NRSRSpider):
         url_template = 'https://www.nrsr.sk/web/Default.aspx?sid=poslanci/poslanec&PoslanecID={member_id}&CisObdobia={period_num}'
         for item in missing:
             yield scrapy.Request(
-                url=url_template.format(member_id=item[1], period_num=item[0]),
+                url=url_template.format(member_id=item[1], period_num=int(item[0])),
                 callback=self.parse_member)
 
 

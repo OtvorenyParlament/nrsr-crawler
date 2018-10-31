@@ -32,6 +32,7 @@ class MemberChangesSpider(NRSRSpider):
             periods = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
             ).extract()
+            periods = list(map(int, periods))
         for period in periods:
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
@@ -73,9 +74,9 @@ class MemberChangesSpider(NRSRSpider):
                 '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href'
             ).extract()
         pages = list(set(pages))
-        period = response.xpath(
+        period = int(response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option[@selected="selected"]/@value'
-        ).extract_first()
+        ).extract_first())
         current_page = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__ResultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
         ).extract()

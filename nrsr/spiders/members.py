@@ -27,6 +27,7 @@ class MembersSpider(NRSRSpider):
             periods = response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
             ).extract()
+            periods = list(map(int, periods))
         i = 0
         for period in periods:
             if i == 0:
