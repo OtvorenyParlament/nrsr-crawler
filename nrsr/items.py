@@ -87,6 +87,29 @@ class MemberChangeItem(scrapy.Item):
     change_reason = scrapy.Field(output_processor=TakeFirst())
 
 
+class DebateAppearanceItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    member_id = scrapy.Field(output_processor=TakeFirst())
+    start = scrapy.Field(output_processor=TakeFirst())
+    end = scrapy.Field(output_processor=TakeFirst())
+    session_num = scrapy.Field(output_processor=TakeFirst())
+    press_num = scrapy.Field()
+    appearance_type = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=Join()
+    )
+    appearance_type_addition = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=Join()
+    )
+    text = scrapy.Field()
+    video_short_url = scrapy.Field(output_processor=TakeFirst())
+    video_long_url = scrapy.Field(output_processor=TakeFirst())
+
+
+
 class PressItem(scrapy.Item):
     type = scrapy.Field()
     title = scrapy.Field()

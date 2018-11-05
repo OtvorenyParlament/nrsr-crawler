@@ -94,6 +94,11 @@ class NrsrPipeline:
                 'bill_id': item['bill_id'],
                 'external_id': item['external_id']
             }
+        elif item_type == 'debate_appearance':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id'],
+            }
         else:
             raise Exception("unknown type {}".format(item['type']))
 
