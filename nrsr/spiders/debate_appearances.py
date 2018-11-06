@@ -33,7 +33,7 @@ class DebateAppearancesSpider(NRSRSpider):
             periods = list(map(int, periods))
 
         if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
+            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
         else:
             date_from = ''
 
@@ -46,9 +46,12 @@ class DebateAppearancesSpider(NRSRSpider):
             body = {
                 '__EVENTTARGET': '',
                 '__EVENTARGUMENT': '',
+                '__LASTFOCUS': '',
                 '__VIEWSTATE': viewstate,
                 '__VIEWSTATEGENERATOR': viewstategenerator,
                 '__EVENTVALIDATION': eventvalidation,
+                '__SCROLLPOSITIONX': '0',
+                '__SCROLLPOSITIONY': '0',
                 '_searchText': '',
                 '_sectionLayoutContainer$ctl01$_termNrCombo': str(period),
                 '_sectionLayoutContainer$ctl01$_mpsCombo': '0',
@@ -57,6 +60,7 @@ class DebateAppearancesSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
                 '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
                 '_sectionLayoutContainer$ctl01$_speechTypeCombo': '',
+                '_sectionLayoutContainer$ctl01$_searchButton': 'Vyhľadať',
                 '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
                 '_sectionLayoutContainer$ctl00$_calendarMonth': '3',
                 '_sectionLayoutContainer$ctl00$_calendarApp': 'nrdvp',
@@ -74,7 +78,6 @@ class DebateAppearancesSpider(NRSRSpider):
                 },
                 meta=meta
             )
-
 
     def parse_appearances(self, response):
         period = response.meta['period_num']
@@ -106,24 +109,26 @@ class DebateAppearancesSpider(NRSRSpider):
             cleaned_pages.append(page_match.groups()[0])
 
         if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
+            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
         else:
             date_from = ''
+
+        viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
+        eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
+        viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
+        scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
+        scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
+        post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
 
         for page in cleaned_pages:
             eventargument = page
             page_num = page.split('$')[-1]
             crawled_string = '{}_{}'.format(period, page_num)
-            viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
-            eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
-            viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
-            scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
-            scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
-            post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
             meta = {'period_num': period}
             body = {
                 '__EVENTTARGET': '_sectionLayoutContainer$ctl01$_resultGrid',
                 '__EVENTARGUMENT': eventargument,
+                '__LASTFOCUS': '',
                 '__VIEWSTATE': viewstate,
                 '__VIEWSTATEGENERATOR': viewstategenerator,
                 '__SCROLLPOSITIONX': scroll_x,
@@ -198,19 +203,13 @@ class DebateAppearancesSpider(NRSRSpider):
             final_item.add_value('period_num', period)
             final_item.add_value(
                 'debater_name',
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[1]/text()'
-                ).extract_first())
+                item.xpath('td/div/div[3]/span[1]/text()').extract_first())
             final_item.add_value(
                 'debater_party',
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[2]/text()'
-                ).extract_first())
+                item.xpath('td/div/div[3]/span[2]/text()').extract_first())
             final_item.add_value(
                 'debater_role',
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[3]/text()'
-                ).extract_first())
+                item.xpath('td/div/div[3]/span[3]/text()').extract_first())
             final_item.add_value('start', when_start)
             final_item.add_value('end', when_end)
             final_item.add_value('session_num', session_num)
