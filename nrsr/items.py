@@ -111,6 +111,48 @@ class DebateAppearanceItem(scrapy.Item):
     video_long_url = scrapy.Field(output_processor=TakeFirst())
 
 
+class HourOfQuestionsItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    status = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    question_by = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    question_date = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    recipient = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    question = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    answer_date = scrapy.Field(
+        output_processor=TakeFirst()
+    )
+    answer_by = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    answer = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    additional_question = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    additional_answer = scrapy.Field(
+        input_processor=MapCompose(filter_whitespaces),
+        output_processor=TakeFirst()
+    )
+    url = scrapy.Field(output_processor=TakeFirst())
+
+
 class InterpelationItem(scrapy.Item):
     type = scrapy.Field(output_processor=TakeFirst())
     period_num = scrapy.Field(output_processor=TakeFirst())
