@@ -15,6 +15,7 @@ class DebateAppearancesSpider(NRSRSpider):
     name = 'debate_appearances'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
+    crawled_appearances = {}
 
     def start_requests(self):
         urls = [
@@ -66,60 +67,6 @@ class DebateAppearancesSpider(NRSRSpider):
 
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, post_action),
-                self.parse_mp_list,
-                args={
-                    'http_method': 'POST',
-                    'body': urlencode(body),
-                },
-                meta=meta
-            )
-
-    def parse_mp_list(self, response):
-        mps = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__mpsCombo"]/option/@value').extract()
-        mps = list(map(int, mps))
-        period = response.meta['period_num']
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-        for mp in mps:
-            # skip nofilter
-            if mp == 0:
-                continue
-            viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
-            eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
-            viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
-            scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
-            scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
-            post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
-            meta = {'period_num': period, 'member_id': mp}
-            body = {
-                '__EVENTTARGET': '',
-                '__EVENTARGUMENT': '',
-                '__VIEWSTATE': viewstate,
-                '__VIEWSTATEGENERATOR': viewstategenerator,
-                '__SCROLLPOSITIONX': scroll_x,
-                '__SCROLLPOSITIONY': scroll_y,
-                '__EVENTVALIDATION': eventvalidation,
-                '_searchText': '',
-                '_sectionLayoutContainer$ctl01$_termNrCombo': str(period),
-                '_sectionLayoutContainer$ctl01$_mpsCombo': str(mp),
-                '_sectionLayoutContainer$ctl01$_cptTextBox': '',
-                '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
-                '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
-                '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
-                '_sectionLayoutContainer$ctl01$_speechTypeCombo': '',
-                '_sectionLayoutContainer$ctl01$_searchButton': 'Vyhľadať',
-                '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
-                '_sectionLayoutContainer$ctl00$_calendarMonth': '3',
-                '_sectionLayoutContainer$ctl00$_calendarApp': 'nrdvp',
-                '_sectionLayoutContainer$ctl00$_calendarLang': '',
-                '_sectionLayoutContainer$ctl00$_monthSelector': '3',
-                '_sectionLayoutContainer$ctl00$_yearSelector': '2018',
-            }
-
-            yield SplashRequest(
-                '{}{}'.format(self.BASE_URL, post_action),
                 self.parse_appearances,
                 args={
                     'http_method': 'POST',
@@ -128,9 +75,9 @@ class DebateAppearancesSpider(NRSRSpider):
                 meta=meta
             )
 
+
     def parse_appearances(self, response):
         period = response.meta['period_num']
-        member_id = response.meta['member_id']
         pages = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href'
         ).extract()
@@ -138,11 +85,11 @@ class DebateAppearancesSpider(NRSRSpider):
         current_page = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
         ).extract_first()
-        
+
         if not current_page:
             current_page = '1'
 
-        initial_string = 'page_{}_{}_{}'.format(period, member_id, current_page)
+        initial_string = '{}_{}'.format(period, current_page)
         if not initial_string in self.crawled_pages:
             self.crawled_pages[initial_string] = True
 
@@ -152,7 +99,7 @@ class DebateAppearancesSpider(NRSRSpider):
             if not page_match:
                 continue
             page_num = page_match.groups()[0].split('$')[-1]
-            crawled_string = 'page_{}_{}_{}'.format(period, member_id, page_num)
+            crawled_string = '{}_{}'.format(period, page_num)
 
             if crawled_string in self.crawled_pages:
                 continue
@@ -165,13 +112,15 @@ class DebateAppearancesSpider(NRSRSpider):
 
         for page in cleaned_pages:
             eventargument = page
+            page_num = page.split('$')[-1]
+            crawled_string = '{}_{}'.format(period, page_num)
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
             viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
             scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
             scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
             post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
-            meta = {'period_num': period, 'member_id': member_id}
+            meta = {'period_num': period}
             body = {
                 '__EVENTTARGET': '_sectionLayoutContainer$ctl01$_resultGrid',
                 '__EVENTARGUMENT': eventargument,
@@ -182,7 +131,7 @@ class DebateAppearancesSpider(NRSRSpider):
                 '__EVENTVALIDATION': eventvalidation,
                 '_searchText': '',
                 '_sectionLayoutContainer$ctl01$_termNrCombo': str(period),
-                '_sectionLayoutContainer$ctl01$_mpsCombo': str(member_id),
+                '_sectionLayoutContainer$ctl01$_mpsCombo': '0',
                 '_sectionLayoutContainer$ctl01$_cptTextBox': '',
                 '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
                 '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
@@ -224,6 +173,8 @@ class DebateAppearancesSpider(NRSRSpider):
             video_parsed = urlparse(video_links[0])
             video_qs = parse_qs(video_parsed.query)
             appearance_id = int(video_qs['id'][0])
+            if appearance_id in self.crawled_appearances:
+                continue
 
             try:
                 session_num = int(where_string.split('.')[0])
@@ -245,7 +196,21 @@ class DebateAppearancesSpider(NRSRSpider):
             final_item.add_value('type', 'debate_appearance')
             final_item.add_value('external_id', appearance_id)
             final_item.add_value('period_num', period)
-            final_item.add_value('member_id', member_id)
+            final_item.add_value(
+                'debater_name',
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[1]/text()'
+                ).extract_first())
+            final_item.add_value(
+                'debater_party',
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[2]/text()'
+                ).extract_first())
+            final_item.add_value(
+                'debater_role',
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer_ctl01__resultGrid"]/tbody/tr/td/div/div[3]/span[3]/text()'
+                ).extract_first())
             final_item.add_value('start', when_start)
             final_item.add_value('end', when_end)
             final_item.add_value('session_num', session_num)
@@ -255,4 +220,5 @@ class DebateAppearancesSpider(NRSRSpider):
             final_item.add_value('text', appearance_text)
             final_item.add_value('video_short_url', video_links[0])
             final_item.add_value('video_long_url', video_links[1])
+            self.crawled_appearances[appearance_id] = True
             yield final_item.load_item()
