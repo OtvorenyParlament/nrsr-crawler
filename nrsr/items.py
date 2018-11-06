@@ -111,6 +111,24 @@ class DebateAppearanceItem(scrapy.Item):
     video_long_url = scrapy.Field(output_processor=TakeFirst())
 
 
+class InterpelationItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    status = scrapy.Field(output_processor=TakeFirst())
+    asked_by = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    description = scrapy.Field(output_processor=TakeFirst())
+    recipients = scrapy.Field()
+    date = scrapy.Field(output_processor=TakeFirst())
+    interpelation_session_num = scrapy.Field(output_processor=TakeFirst())
+    response_session_num = scrapy.Field(output_processor=TakeFirst())
+    responded_by = scrapy.Field(output_processor=TakeFirst())
+    press_num = scrapy.Field(output_processor=TakeFirst())
+    url = scrapy.Field(output_processor=TakeFirst())
+    attachments_names = scrapy.Field()
+    attachments_urls = scrapy.Field()
+    attachments = scrapy.Field()
+
 
 class PressItem(scrapy.Item):
     type = scrapy.Field()
