@@ -1,5 +1,5 @@
 """
-Interpelations Spider
+Interpellations Spider
 """
 
 from datetime import datetime, timedelta
@@ -9,14 +9,14 @@ import scrapy
 from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
-from nrsr.items import InterpelationItem
+from nrsr.items import InterpellationItem
 
-class InterpelationsSpider(NRSRSpider):
+class InterpellationsSpider(NRSRSpider):
 
-    name = 'interpelations'
+    name = 'interpellations'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
-    crawled_interpelations = {}
+    crawled_interpellations = {}
 
     def start_requests(self):
         urls = [
@@ -185,30 +185,30 @@ class InterpelationsSpider(NRSRSpider):
             itemlink = item.xpath('td[1]/a/@href').extract_first()
             url_parsed = urlparse(itemlink)
             url_qs = parse_qs(url_parsed.query)
-            interpelation_id = int(url_qs['ID'][0])
-            if interpelation_id in self.crawled_interpelations:
+            interpellation_id = int(url_qs['ID'][0])
+            if interpellation_id in self.crawled_interpellations:
                 continue
-            self.crawled_interpelations[interpelation_id] = True
+            self.crawled_interpellations[interpellation_id] = True
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, itemlink),
-                self.parse_interpelation,
+                self.parse_interpellation,
                 meta={'period_num': period}
             )
 
-    def parse_interpelation(self, response):
+    def parse_interpellation(self, response):
         url_parsed = urlparse(response.url)
         url_qs = parse_qs(url_parsed.query)
-        interpelation_id = int(url_qs['ID'][0])
+        interpellation_id = int(url_qs['ID'][0])
 
-        item = scrapy.loader.ItemLoader(item=InterpelationItem())
-        item.add_value('type', 'interpelation')
+        item = scrapy.loader.ItemLoader(item=InterpellationItem())
+        item.add_value('type', 'interpellation')
         item.add_value('period_num', response.meta['period_num'])
         item.add_value(
             'status',
             response.xpath(
                 '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[1]/span/text()'
             ).extract_first())
-        item.add_value('external_id', interpelation_id)
+        item.add_value('external_id', interpellation_id)
         item.add_value(
             'asked_by',
             response.xpath(
@@ -234,13 +234,13 @@ class InterpelationsSpider(NRSRSpider):
             ).replace(hour=12)
         )
         try:
-            interpelation_session_num = int(
+            interpellation_session_num = int(
                 response.xpath(
                     '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[5]/span/text()'
                 ).extract_first())
         except (TypeError, ValueError):
-            interpelation_session_num = None
-        item.add_value('interpelation_session_num', interpelation_session_num)
+            interpellation_session_num = None
+        item.add_value('interpellation_session_num', interpellation_session_num)
         item.add_value(
             'responded_by',
             response.xpath(
@@ -262,24 +262,24 @@ class InterpelationsSpider(NRSRSpider):
         except TypeError:
             press_num = None
         item.add_value('press_num', press_num)
-        interpelation = response.xpath(
+        interpellation = response.xpath(
             '//*[@id="_sectionLayoutContainer__panelContent"]/a[1]')
-        interpelation_response = response.xpath(
+        interpellation_response = response.xpath(
             '//*[@id="_sectionLayoutContainer__panelContent"]/a[2]')
         attachments = []
-        if interpelation:
+        if interpellation:
             attachments.append({
-                'url': '{}{}'.format(self.BASE_URL, interpelation.xpath('@href').extract_first()),
-                'name': interpelation.xpath('text()').extract_first().strip()
+                'url': '{}{}'.format(self.BASE_URL, interpellation.xpath('@href').extract_first()),
+                'name': interpellation.xpath('text()').extract_first().strip()
             })
-        if interpelation_response:
+        if interpellation_response:
             attachments.append({
                 'url':
                 '{}{}'.format(
                     self.BASE_URL,
-                    interpelation_response.xpath('@href').extract_first()),
+                    interpellation_response.xpath('@href').extract_first()),
                 'name':
-                interpelation_response.xpath('text()').extract_first().strip()
+                interpellation_response.xpath('text()').extract_first().strip()
             })
 
         item.add_value('attachments_names', attachments)

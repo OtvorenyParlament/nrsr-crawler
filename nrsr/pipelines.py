@@ -99,7 +99,7 @@ class NrsrPipeline:
                 'type': item_type,
                 'external_id': item['external_id'],
             }
-        elif item_type == 'interpelation':
+        elif item_type == 'interpellation':
             match_dict = {
                 'type': item_type,
                 'external_id': item['external_id']

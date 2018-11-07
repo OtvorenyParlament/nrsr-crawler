@@ -153,7 +153,7 @@ class HourOfQuestionsItem(scrapy.Item):
     url = scrapy.Field(output_processor=TakeFirst())
 
 
-class InterpelationItem(scrapy.Item):
+class InterpellationItem(scrapy.Item):
     type = scrapy.Field(output_processor=TakeFirst())
     period_num = scrapy.Field(output_processor=TakeFirst())
     status = scrapy.Field(output_processor=TakeFirst())
@@ -162,7 +162,7 @@ class InterpelationItem(scrapy.Item):
     description = scrapy.Field(output_processor=TakeFirst())
     recipients = scrapy.Field()
     date = scrapy.Field(output_processor=TakeFirst())
-    interpelation_session_num = scrapy.Field(output_processor=TakeFirst())
+    interpellation_session_num = scrapy.Field(output_processor=TakeFirst())
     response_session_num = scrapy.Field(output_processor=TakeFirst())
     responded_by = scrapy.Field(output_processor=TakeFirst())
     press_num = scrapy.Field(output_processor=TakeFirst())
