@@ -1,5 +1,5 @@
 """
-Interpellations Spider
+Amendments Spider
 """
 
 from datetime import datetime, timedelta
@@ -9,19 +9,19 @@ import scrapy
 from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
-from nrsr.items import InterpellationItem
+from nrsr.items import AmendmentItem
 
 
-class InterpellationsSpider(NRSRSpider):
+class AmendmentsSpider(NRSRSpider):
 
-    name = 'interpellations'
+    name = 'amendments'
     BASE_URL = 'https://www.nrsr.sk/web/'
     crawled_pages = {}
-    crawled_interpellations = {}
+    crawled_amendments = {}
 
     def start_requests(self):
         urls = [
-            'https://www.nrsr.sk/web/Default.aspx?sid=schodze/interpelacie_result',
+            'https://www.nrsr.sk/web/Default.aspx?sid=schodze/nrepdn',
 
         ]
         for url in urls:
@@ -59,25 +59,21 @@ class InterpellationsSpider(NRSRSpider):
                 '__SCROLLPOSITIONY': scroll_y,
                 '__EVENTVALIDATION': eventvalidation,
                 '_searchText': '',
-                '_sectionLayoutContainer$ctl01$ctlText': '',
+                '_sectionLayoutContainer$ctl01$ctlNazov': '',
                 '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
-                '_sectionLayoutContainer$ctl01$ctlAdresat': '',
-                '_sectionLayoutContainer$ctl01$_mpsCombo': '-1',
-                '_sectionLayoutContainer$ctl01$ctlZadavatelKlub': '',
-                '_sectionLayoutContainer$ctl01$_meetingNrIntCombo': '0',
-                '_sectionLayoutContainer$ctl01$_meetingNrOdpCombo': '0',
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
+                '_sectionLayoutContainer$ctl01$PoslanecMasterID': '-1',
+                '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
                 '_sectionLayoutContainer$ctl01$DatumOd': date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
-                '_sectionLayoutContainer$ctl01$_stateCombo': '',
-                '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
+                '_sectionLayoutContainer$ctl01$Type': 'optFullTextType',
                 '_sectionLayoutContainer$ctl01$cmdSearch': 'Vyhľadať',
                 '_sectionLayoutContainer$ctl00$_calendarYear': '2018',
-                '_sectionLayoutContainer$ctl00$_calendarMonth': '3',
+                '_sectionLayoutContainer$ctl00$_calendarMonth': '11',
                 '_sectionLayoutContainer$ctl00$_calendarApp': 'nrdvp',
                 '_sectionLayoutContainer$ctl00$_calendarLang': '',
-                '_sectionLayoutContainer$ctl00$_monthSelector': '3',
-                '_sectionLayoutContainer$ctl00$_yearSelector': '2018',
+                '_sectionLayoutContainer$ctl00$_monthSelector': '11',
+                '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
             }
 
             yield SplashRequest(
@@ -183,109 +179,82 @@ class InterpellationsSpider(NRSRSpider):
             '//*[@id="_sectionLayoutContainer_ctl01_dgResult"]/tbody/tr[contains(@class, "tab_zoznam_nonalt") or contains(@class, "tab_zoznam_alt")]'
         )
         for item in items:
-            itemlink = item.xpath('td[1]/a/@href').extract_first()
+            itemlink = item.xpath('td[4]/a/@href').extract_first()
+            press_num = item.xpath('td[3]/text()').extract_first()
+            if press_num:
+                press_num = int(press_num)
             url_parsed = urlparse(itemlink)
             url_qs = parse_qs(url_parsed.query)
-            interpellation_id = int(url_qs['ID'][0])
-            if interpellation_id in self.crawled_interpellations:
+            amendment_id = int(url_qs['id'][0])
+            if amendment_id in self.crawled_amendments:
                 continue
-            self.crawled_interpellations[interpellation_id] = True
+            self.crawled_amendments[amendment_id] = True
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, itemlink),
-                self.parse_interpellation,
-                meta={'period_num': period}
+                self.parse_amendment,
+                meta={'period_num': period, 'press_num': press_num}
             )
 
-    def parse_interpellation(self, response):
+    def parse_amendment(self, response):
         url_parsed = urlparse(response.url)
         url_qs = parse_qs(url_parsed.query)
-        interpellation_id = int(url_qs['ID'][0])
+        amendment_id = int(url_qs['id'][0])
 
-        item = scrapy.loader.ItemLoader(item=InterpellationItem())
-        item.add_value('type', 'interpellation')
+        press_num = response.meta['press_num']
+
+        item = scrapy.loader.ItemLoader(item=AmendmentItem())
+        item.add_value('type', 'amendment')
+        item.add_value('external_id', amendment_id)
         item.add_value('period_num', response.meta['period_num'])
+        item.add_value('press_num', press_num)
         item.add_value(
-            'status',
+            'session_num',
+            int(
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[4]/span/text()'
+                ).extract_first()))
+        item.add_value(
+            'title',
             response.xpath(
                 '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[1]/span/text()'
             ).extract_first())
-        item.add_value('external_id', interpellation_id)
         item.add_value(
-            'asked_by',
+            'submitter',
             response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[2]/span/text()'
+                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[3]/span/text()'
             ).extract_first())
         item.add_value(
-            'description',
+            'other_submitters',
             response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[1]/span/text()'
-            ).extract_first())
-        item.add_value(
-            'recipients',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[3]/span/text()'
-            ).extract_first())
+                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[8]/span/ul/li/span/text()'
+            ).extract())
+        date_string = response.xpath(
+            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[6]/span/text()'
+        ).extract_first()
+        date_match = re.match(r'(\d+\. \d+\. \d+).*', date_string)
         item.add_value(
             'date',
             datetime.strptime(
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[4]/span/text()'
-                ).extract_first(),
-                '%d. %m. %Y'
-            ).replace(hour=12)
+                date_match.groups()[0], '%d. %m. %Y').replace(hour=12)
         )
-        try:
-            interpellation_session_num = int(
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[5]/span/text()'
-                ).extract_first())
-        except (TypeError, ValueError):
-            interpellation_session_num = None
-        item.add_value('interpellation_session_num', interpellation_session_num)
         item.add_value(
-            'responded_by',
+            'signed_members',
             response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[3]/div[1]/span/text()'
-            ).extract_first())
-        try:
-            response_session_num = int(
+                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/ul/li/span/text()'
+            ).extract())
+        voting_link = response.xpath(
+            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/a/@href'
+        ).extract_first()
+        if voting_link:
+            link_parsed = urlparse(
                 response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[3]/div[2]/span/text()'
+                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/a/@href'
                 ).extract_first())
-        except (TypeError, ValueError):
-            response_session_num = None
-        item.add_value('response_session_num', response_session_num)
-        try:
-            press_num = int(
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[3]/div[3]/span/text()'
-                ).extract_first())
-        except TypeError:
-            press_num = None
-        item.add_value('press_num', press_num)
-        interpellation = response.xpath(
-            '//*[@id="_sectionLayoutContainer__panelContent"]/a[1]')
-        interpellation_response = response.xpath(
-            '//*[@id="_sectionLayoutContainer__panelContent"]/a[2]')
-        attachments = []
-        if interpellation:
-            attachments.append({
-                'url': '{}{}'.format(self.BASE_URL, interpellation.xpath('@href').extract_first()),
-                'name': interpellation.xpath('text()').extract_first().strip()
-            })
-        if interpellation_response:
-            attachments.append({
-                'url':
-                '{}{}'.format(
-                    self.BASE_URL,
-                    interpellation_response.xpath('@href').extract_first()),
-                'name':
-                interpellation_response.xpath('text()').extract_first().strip()
-            })
-
-        item.add_value('attachments_names', attachments)
-        item.add_value('attachments_urls', response.xpath(
-            '//*[@id="_sectionLayoutContainer__panelContent"]/a/@href').extract())
+            link_qs = parse_qs(link_parsed.query)
+            voting_external_id = int(link_qs['ID'][0])
+        else:
+            voting_external_id = None
+        item.add_value('voting_external_id', voting_external_id)
         item.add_value('url', response.url)
 
         yield item.load_item()

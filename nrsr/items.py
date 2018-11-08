@@ -153,6 +153,24 @@ class HourOfQuestionsItem(scrapy.Item):
     url = scrapy.Field(output_processor=TakeFirst())
 
 
+class AmendmentItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    press_num = scrapy.Field(output_processor=TakeFirst())
+    session_num = scrapy.Field(output_processor=TakeFirst())
+    title = scrapy.Field(output_processor=TakeFirst())
+    submitter = scrapy.Field(output_processor=TakeFirst())
+    other_submitters = scrapy.Field()
+    date = scrapy.Field(output_processor=TakeFirst())
+    signed_members = scrapy.Field()
+    voting_external_id = scrapy.Field(output_processor=TakeFirst())
+    attachments_names = scrapy.Field()
+    attachments_urls = scrapy.Field()
+    attachments = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
+
+
 class InterpellationItem(scrapy.Item):
     type = scrapy.Field(output_processor=TakeFirst())
     period_num = scrapy.Field(output_processor=TakeFirst())

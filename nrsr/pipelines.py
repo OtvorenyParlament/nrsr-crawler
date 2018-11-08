@@ -104,6 +104,11 @@ class NrsrPipeline:
                 'type': item_type,
                 'external_id': item['external_id']
             }
+        elif item_type == 'amendment':
+            match_dict = {
+                'type': item_type,
+                'external_id': item['external_id']
+            }
         elif item_type == 'hour_of_questions':
             match_dict = {
                 'type': item_type,
