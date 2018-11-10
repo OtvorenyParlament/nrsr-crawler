@@ -33,12 +33,12 @@ class MissingPressSpider(scrapy.Spider):
             'type': 'press'
         }, {
             'period_num': 1,
-            'num': 1
+            'press_num': 1
         })
 
         wanted_list = [(x['period_num'], x['press_num']) for x in wanted
                        if 'press_num' in x]
-        having_list = [(x['period_num'], x['num']) for x in having]
+        having_list = [(x['period_num'], x['press_num']) for x in having]
 
         missing = set(wanted_list) - set(having_list)
         url_template = 'https://www.nrsr.sk/web/Default.aspx?sid=zakony/cpt&CisObdobia={period_num}&ID={external_id}'
