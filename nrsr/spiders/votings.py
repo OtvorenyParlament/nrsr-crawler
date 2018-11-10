@@ -251,5 +251,5 @@ class VotingSpider(NRSRSpider):
             member_external_id = int(parse_qs(url_parsed.query)['PoslanecID'][0])
             daily_clubs[current_club].append(member_external_id)
         transformed_clubs = [[k, v] for (k, v) in daily_clubs.items()]
-        daily_club.add_value('clubs', transformed_clubs)
+        daily_club.add_value('clubs', sorted(transformed_clubs))
         yield daily_club.load_item()
