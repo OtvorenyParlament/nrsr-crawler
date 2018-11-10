@@ -3,6 +3,7 @@ Bills spider
 """
 
 from datetime import datetime, timedelta
+import re
 from urllib.parse import urlparse, parse_qs, urlencode
 
 import scrapy
@@ -119,11 +120,16 @@ class BillsSpider(NRSRSpider):
             delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(
                 hour=12, minute=0, second=0, microsecond=0)
         item.add_value('delivered', delivered)
+        try:
+            press_num = int(response.xpath(
+                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()'
+            ).extract_first())
+        except TypeError:
+            press_num = None
         item.add_value(
             'press_num',
-            int(response.xpath(
-                '//*[@id="_sectionLayoutContainer_ctl01_ctl00__CptLink"]/text()'
-            ).extract_first()))
+            press_num
+            )
         item.add_value(
             'current_state',
             response.xpath(
@@ -172,12 +178,13 @@ class BillsSpider(NRSRSpider):
         coordinator_label = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GestorskyVyborLabel"]/text()').extract_first()
         step_result = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__ResultLabel"]/text()').extract_first()
 
-
         coordinator_meeting_date = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumPrerokovaniaLabel"]/text()').extract_first()
         if coordinator_meeting_date:
-            coordinator_name = datetime.strptime(
-                response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GVNameLabel"]/text()').extract_first(),
-                '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+            coordinator_meeting_date = datetime.strptime(
+                coordinator_meeting_date.replace(', ', '').replace('\xa0', ''),
+                '%d. %m. %Y'
+            ).replace(hour=12)
+            coordinator_name = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__GVNameLabel"]/text()').extract_first()
         else:
             coordinator_name = None
 
@@ -193,9 +200,10 @@ class BillsSpider(NRSRSpider):
             rows = response.xpath('//*[@id="_sectionLayoutContainer_ctl01_ctl00__PdnList__pdnListPanel"]/table/tr')
             for row in rows:
                 change = BillStepChangeItem()
+                date_match = re.match(r'(\d+\. \d+\. \d+).*', row.xpath('td[1]/text()').extract_first().strip())
                 change['date'] = datetime.strptime(
-                    row.xpath('td[1]/text()').extract_first(),
-                    '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+                    date_match.groups()[0],
+                    '%d. %m. %Y').replace(hour=12)
                 change['author'] = row.xpath('td[2]/text()').extract_first()
                 change['detail'] = row.xpath('td[3]/a/@href').extract_first()
                 change['attachment_title'] = row.xpath('td[4]/a/text()').extract_first()
