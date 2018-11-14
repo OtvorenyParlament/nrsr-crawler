@@ -5,7 +5,6 @@ Pull Members which are not reachable directly but are linked in changes
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 import scrapy
-from scrapy.utils.project import get_project_settings
 import pymongo
 
 from nrsr.nrsr_spider import NRSRSpider
@@ -18,10 +17,9 @@ class MissingMembersSpider(NRSRSpider):
     BASE_URL = 'https://www.nrsr.sk/web/'
 
     def start_requests(self):
-        settings = get_project_settings()
-        client = pymongo.MongoClient('{}/{}'.format(settings.get('MONGO_URI'), settings.get('MONGO_DATABASE')))
+        client = pymongo.MongoClient('{}/{}'.format(self.mongo_uri, self.mongo_database))
         db = client['nrsr']
-        collection = settings.get('MONGO_COL')
+        collection = self.mongo_col
         results1 = db[collection].find({
             'type': 'member_change'
         }, {

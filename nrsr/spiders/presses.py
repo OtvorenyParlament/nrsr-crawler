@@ -33,12 +33,9 @@ class PressSpider(NRSRSpider):
             periods = response.xpath(
                 '//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
             periods = list(map(int, periods))
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
+
         for period in periods:
-            if int(period) == 1:
+            if period == 1:
                 continue
             # parse period
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
@@ -60,7 +57,7 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
                 '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
-                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
+                '_sectionLayoutContainer$ctl01$DatumOd': self.date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
                 '_sectionLayoutContainer$ctl01$cmdSearch': 'Vyhľadať',
@@ -110,11 +107,7 @@ class PressSpider(NRSRSpider):
                 print("{} already crawled".format(crawled_string))
                 continue
             cleaned_pages.append(page_match.groups()[0])
-        
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
+
         for page in cleaned_pages:
             eventargument = page
             page_num = eventargument.split('$')[-1]
@@ -137,7 +130,7 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$ctlCisObdobia': str(period),
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
                 '_sectionLayoutContainer$ctl01$ctlTypTlace': '-1',
-                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
+                '_sectionLayoutContainer$ctl01$DatumOd': self.date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
                 '_sectionLayoutContainer$ctl01$ctl00$txtDescriptorText': '',

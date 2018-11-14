@@ -32,11 +32,6 @@ class BillsSpider(NRSRSpider):
             periods = response.xpath('//*/select[@id="_sectionLayoutContainer_ctl01_ctlCisObdobia"]/option/@value').extract()
             periods = list(map(int, periods))
 
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-
         for period in periods:
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
@@ -63,7 +58,7 @@ class BillsSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$ctlView': '',
                 '_sectionLayoutContainer$ctl01$_Ciastka': '',
                 '_sectionLayoutContainer$ctl01$_Cislo': '',
-                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
+                '_sectionLayoutContainer$ctl01$DatumOd': self.date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
                 '_sectionLayoutContainer$ctl01$cmdSearch': 'Vyhľadať',

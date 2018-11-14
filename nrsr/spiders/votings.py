@@ -31,10 +31,7 @@ class VotingSpider(NRSRSpider):
         else:
             periods = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__termNrCombo"]/option/@value').extract()
             periods = list(map(int, periods))
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
+
         for period in periods:
             meta = {'period_num': period}
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
@@ -57,7 +54,7 @@ class VotingSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_termNrCombo': str(period),
                 '_sectionLayoutContainer$ctl01$_cptTextBox': '',
                 '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
-                '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
+                '_sectionLayoutContainer$ctl01$_dateFromTextBox': self.date_from,
                 '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
                 '_sectionLayoutContainer$ctl01$Type': '_searchTypeFullTextOption',
                 '_sectionLayoutContainer$ctl01$_searchButton': 'Vyhľadať',
@@ -80,10 +77,6 @@ class VotingSpider(NRSRSpider):
             )
 
     def parse_pages(self, response):
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
         pages = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/a/@href').extract()
         pages = list(set(pages))
         current_page = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__resultGrid2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()').extract()
@@ -100,10 +93,6 @@ class VotingSpider(NRSRSpider):
             if crawled_string in self.crawled_pages:
                 continue
             cleaned_pages.append(page_match.groups()[0])
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
 
         for page in cleaned_pages:
             eventargument = page
@@ -129,7 +118,7 @@ class VotingSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_termNrCombo': period,
                 '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
                 '_sectionLayoutContainer$ctl01$_cptTextBox': '',
-                '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
+                '_sectionLayoutContainer$ctl01$_dateFromTextBox': self.date_from,
                 '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
                 '_sectionLayoutContainer$ctl01$Type': '_searchTypeFullTextOption',
                 '_sectionLayoutContainer$ctl00$_calendarYear': '2018',

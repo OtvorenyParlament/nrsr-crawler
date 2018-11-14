@@ -32,11 +32,6 @@ class DebateAppearancesSpider(NRSRSpider):
             periods = response.xpath('//*[@id="_sectionLayoutContainer_ctl01__termNrCombo"]/option/@value').extract()
             periods = list(map(int, periods))
 
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-
         for period in periods:
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
@@ -57,7 +52,7 @@ class DebateAppearancesSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_mpsCombo': '0',
                 '_sectionLayoutContainer$ctl01$_cptTextBox': '',
                 '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
-                '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
+                '_sectionLayoutContainer$ctl01$_dateFromTextBox': self.date_from,
                 '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
                 '_sectionLayoutContainer$ctl01$_speechTypeCombo': '',
                 '_sectionLayoutContainer$ctl01$_searchButton': 'Vyhľadať',
@@ -108,11 +103,6 @@ class DebateAppearancesSpider(NRSRSpider):
                 continue
             cleaned_pages.append(page_match.groups()[0])
 
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=1)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-
         viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
         eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
         viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
@@ -139,7 +129,7 @@ class DebateAppearancesSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_mpsCombo': '0',
                 '_sectionLayoutContainer$ctl01$_cptTextBox': '',
                 '_sectionLayoutContainer$ctl01$_meetingNrCombo': '0',
-                '_sectionLayoutContainer$ctl01$_dateFromTextBox': date_from,
+                '_sectionLayoutContainer$ctl01$_dateFromTextBox': self.date_from,
                 '_sectionLayoutContainer$ctl01$_dateToTextBox': '',
                 '_sectionLayoutContainer$ctl01$_speechTypeCombo': '',
                 '_sectionLayoutContainer$ctl00$_calendarYear': '2018',

@@ -36,11 +36,6 @@ class InterpellationsSpider(NRSRSpider):
             ).extract()
             periods = list(map(int, periods))
 
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-
         for period in periods:
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
@@ -67,7 +62,7 @@ class InterpellationsSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_meetingNrIntCombo': '0',
                 '_sectionLayoutContainer$ctl01$_meetingNrOdpCombo': '0',
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
-                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
+                '_sectionLayoutContainer$ctl01$DatumOd': self.date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$_stateCombo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',
@@ -119,11 +114,6 @@ class InterpellationsSpider(NRSRSpider):
                 continue
             cleaned_pages.append(page_match.groups()[0])
 
-        if self.daily:
-            date_from = (datetime.utcnow() - timedelta(days=7)).strftime('%d. %m. %Y')
-        else:
-            date_from = ''
-
         for page in cleaned_pages:
             eventargument = page
             page_num = page.split('$')[-1]
@@ -153,7 +143,7 @@ class InterpellationsSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl01$_meetingNrIntCombo': '0',
                 '_sectionLayoutContainer$ctl01$_meetingNrOdpCombo': '0',
                 '_sectionLayoutContainer$ctl01$ctlCPT': '',
-                '_sectionLayoutContainer$ctl01$DatumOd': date_from,
+                '_sectionLayoutContainer$ctl01$DatumOd': self.date_from,
                 '_sectionLayoutContainer$ctl01$DatumDo': '',
                 '_sectionLayoutContainer$ctl01$_stateCombo': '',
                 '_sectionLayoutContainer$ctl01$Type': 'optSearchType',

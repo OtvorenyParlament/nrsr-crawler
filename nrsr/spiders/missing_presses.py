@@ -7,21 +7,20 @@ from urllib.parse import urlparse
 
 import pymongo
 import scrapy
-from scrapy.utils.project import get_project_settings
 
+from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import PressItem
 
 
-class MissingPressSpider(scrapy.Spider):
+class MissingPressSpider(NRSRSpider):
     name = 'missing_presses'
     BASE_URL = 'https://www.nrsr.sk/web/'
 
     def start_requests(self):
-        settings = get_project_settings()
         client = pymongo.MongoClient('{}/{}'.format(
-            settings.get('MONGO_URI'), settings.get('MONGO_DATABASE')))
+            self.mongo_uri, self.mongo_database))
         db = client['nrsr']
-        collection = settings.get('MONGO_COL')
+        collection = self.mongo_col
 
         wanted = db[collection].find({
             'type': 'voting'
