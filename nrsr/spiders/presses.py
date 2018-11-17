@@ -94,8 +94,13 @@ class PressSpider(NRSRSpider):
             '//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
         ).extract()
 
-        if current_page[0].isdigit():
-            self.crawled_pages['{}_{}'.format(period, current_page[0])] = True
+        if not current_page:
+            current_page = '1'
+
+        initial_string = '{}_{}'.format(period, current_page)
+        if not initial_string in self.crawled_pages:
+            self.crawled_pages[initial_string] = True
+
         cleaned_pages = []
         for page in pages:
             page_match = re.match(r'.*(Page.*[0-9]).*', page)
@@ -142,6 +147,8 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl00$_monthSelector': '9',
                 '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
             }
+            if not crawled_string in self.crawled_pages:
+                self.crawled_pages[crawled_string] = True
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, post_action),
                 self.parse_pages,
