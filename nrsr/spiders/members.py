@@ -90,31 +90,32 @@ class MembersSpider(NRSRSpider):
             '//*{}/div[1]/div[1]/div[1]/div[4]/span/text()'.format(panel_content)
         ).extract_first())
 
-        item.add_value('born', datetime.strptime(
-            response.xpath(
-                '//*{}/div[1]/div[1]/div[1]/div[5]/span/text()'.format(panel_content)
-            ).extract_first().strip().replace('&nbsp;', ''),
-            '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
-        )
+        # GDPR
+        # item.add_value('born', datetime.strptime(
+        #     response.xpath(
+        #         '//*{}/div[1]/div[1]/div[1]/div[5]/span/text()'.format(panel_content)
+        #     ).extract_first().strip().replace('&nbsp;', ''),
+        #     '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+        # )
 
-        item.add_value('nationality', response.xpath(
-            '//*{}/div[1]/div[1]/div[1]/div[6]/span/text()'.format(panel_content)
-        ).extract_first())
+        # item.add_value('nationality', response.xpath(
+        #     '//*{}/div[1]/div[1]/div[1]/div[6]/span/text()'.format(panel_content)
+        # ).extract_first())
 
-        item.add_value('residence', response.xpath(
-            '//*{}/div[1]/div[1]/div[1]/div[7]/span/text()'.format(panel_content)
-        ).extract_first())
+        # item.add_value('residence', response.xpath(
+        #     '//*{}/div[1]/div[1]/div[1]/div[7]/span/text()'.format(panel_content)
+        # ).extract_first())
 
-        item.add_value('county', response.xpath(
-            '//*{}/div[1]/div[1]/div[1]/div[8]/span/text()'.format(panel_content)
-        ).extract_first())
+        # item.add_value('county', response.xpath(
+        #     '//*{}/div[1]/div[1]/div[1]/div[8]/span/text()'.format(panel_content)
+        # ).extract_first())
 
-        item.add_value('email', response.xpath(
-            '//*{}/div[1]/div[1]/div[1]/div[9]/span/a/@href'.format(panel_content)
-        ).extract_first())
+        # item.add_value('email', response.xpath(
+        #     '//*{}/div[1]/div[1]/div[1]/div[9]/span/a/@href'.format(panel_content)
+        # ).extract_first())
 
-        item.add_value('image_urls', response.xpath(
-            '//*{}/div[1]/div[2]/div/img/@src'.format(panel_content)).extract())
+        # item.add_value('image_urls', response.xpath(
+        #     '//*{}/div[1]/div[2]/div/img/@src'.format(panel_content)).extract())
 
         # memberships
         memberships = response.xpath(
