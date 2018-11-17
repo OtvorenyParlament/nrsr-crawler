@@ -114,8 +114,8 @@ class MembersSpider(NRSRSpider):
         #     '//*{}/div[1]/div[1]/div[1]/div[9]/span/a/@href'.format(panel_content)
         # ).extract_first())
 
-        # item.add_value('image_urls', response.xpath(
-        #     '//*{}/div[1]/div[2]/div/img/@src'.format(panel_content)).extract())
+        item.add_value('image_urls', response.xpath(
+            '//*{}/div[1]/div[2]/div/img/@src'.format(panel_content)).extract())
 
         # memberships
         memberships = response.xpath(
