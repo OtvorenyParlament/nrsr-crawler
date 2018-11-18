@@ -197,54 +197,62 @@ class AmendmentsSpider(NRSRSpider):
         item.add_value('external_id', amendment_id)
         item.add_value('period_num', response.meta['period_num'])
         item.add_value('press_num', press_num)
-        item.add_value(
-            'session_num',
-            int(
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[4]/span/text()'
-                ).extract_first()))
-        item.add_value(
-            'title',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[1]/span/text()'
-            ).extract_first())
-        item.add_value(
-            'submitter',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[3]/span/text()'
-            ).extract_first())
-        item.add_value(
-            'other_submitters',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[8]/span/ul/li/span/text()'
-            ).extract())
-        date_string = response.xpath(
-            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[6]/span/text()'
-        ).extract_first()
-        date_match = re.match(r'(\d+\. \d+\. \d+).*', date_string)
-        item.add_value(
-            'date',
-            datetime.strptime(
-                date_match.groups()[0], '%d. %m. %Y').replace(hour=12)
+
+        # nah nah
+        grid_15 = response.xpath(
+            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[contains(@class, "grid_15")]'
         )
-        item.add_value(
-            'signed_members',
-            response.xpath(
-                '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/ul/li/span/text()'
-            ).extract())
-        voting_link = response.xpath(
-            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/a/@href'
-        ).extract_first()
-        if voting_link:
-            link_parsed = urlparse(
-                response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[10]/span/a/@href'
-                ).extract_first())
-            link_qs = parse_qs(link_parsed.query)
-            voting_external_id = int(link_qs['ID'][0])
-        else:
-            voting_external_id = None
-        item.add_value('voting_external_id', voting_external_id)
+        for grid in grid_15:
+            block = grid.xpath('strong/text()').extract_first()
+            if block == 'Ďalší predkladatelia':
+                other_submitters = grid.xpath('span/ul/li/span/text()').extract()
+                item.add_value('other_submitters', other_submitters)
+            elif block == 'Podpísaní poslanci':
+                signed_members = grid.xpath('span/ul/li/span/text()').extract()
+                item.add_value('signed_members', signed_members)
+            elif block == 'Názov':
+                continue
+            else:
+                raise Exception("Unknown block {}".format(block))
+
+        for grid in response.xpath(
+            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[contains(@class, "grid_3")]'
+        ):
+            heading = grid.xpath('strong/text()').extract_first()
+            value = grid.xpath('span/text()').extract_first()
+            key = None
+            if heading == 'Predkladateľ':
+                key = 'submitter'
+            elif heading == 'Číslo schôdze':
+                key = 'session_num'
+                try:
+                    value = int(value)
+                except:
+                    pass
+            elif heading == 'Dátum podania':
+                key = 'date'
+                date_match = re.match(r'(\d+\. \d+\. \d+).*', value)
+                value = datetime.strptime(
+                    date_match.groups()[0], '%d. %m. %Y').replace(hour=12)
+            if key:
+                item.add_value(key, value)
+        
+        grid_6 = response.xpath(
+            '//*[@id="_sectionLayoutContainer__panelContent"]/div[1]/div[contains(@class, "grid_6")]'
+        )
+        for grid in grid_6:
+            block = grid.xpath('strong/text()').extract_first()
+            if block == 'Hlasovanie o návrhu':
+                voting_link = grid.xpath('span/a/@href').extract_first()
+                if voting_link:
+                    link_parsed = urlparse(voting_link)
+                    link_qs = parse_qs(link_parsed.query)
+                    voting_external_id = int(link_qs['ID'][0])
+                else:
+                    voting_external_id = None
+                item.add_value('voting_external_id', voting_external_id)
+            else:
+                raise Exception("Unknown grid_6 {}".format(block))
         item.add_value('url', response.url)
 
         yield item.load_item()
