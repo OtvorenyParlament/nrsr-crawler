@@ -171,10 +171,11 @@ class DebateAppearancesSpider(NRSRSpider):
             if appearance_id in self.crawled_appearances:
                 continue
 
-            try:
-                session_num = int(where_string.split('.')[0])
-            except:
-                session_num = None
+            session_num = None
+            session_num_match = re.match(r'^[^\d]*(\d+)', where_string)
+            if session_num_match:
+                session_num = int(session_num_match.groups()[0])
+                
             try:
                 appearance_type_string = item.xpath(
                     'td[1]/div/div[3]/span[4]/em/text()').extract_first().strip()
