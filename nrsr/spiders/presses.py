@@ -92,7 +92,7 @@ class PressSpider(NRSRSpider):
         period = int(url_qs['CisObdobia'][0])
         current_page = response.xpath(
             '//*[@id="_sectionLayoutContainer_ctl01_dgResult2"]/tbody/tr[1]/td/table/tbody/tr/td/span/text()'
-        ).extract()
+        ).extract_first()
 
         if not current_page:
             current_page = '1'
@@ -109,13 +109,14 @@ class PressSpider(NRSRSpider):
             page_num = page_match.groups()[0].split('$')[-1]
             crawled_string = '{}_{}'.format(period, page_num)
             if crawled_string in self.crawled_pages:
-                print("{} already crawled".format(crawled_string))
                 continue
             cleaned_pages.append(page_match.groups()[0])
 
         for page in cleaned_pages:
             eventargument = page
             page_num = eventargument.split('$')[-1]
+            crawled_string = '{}_{}'.format(period, page_num)
+
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
             viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
@@ -147,7 +148,7 @@ class PressSpider(NRSRSpider):
                 '_sectionLayoutContainer$ctl00$_monthSelector': '9',
                 '_sectionLayoutContainer$ctl00$_yearSelector': '2018'
             }
-            if not crawled_string in self.crawled_pages:
+            if crawled_string not in self.crawled_pages:
                 self.crawled_pages[crawled_string] = True
             yield SplashRequest(
                 '{}{}'.format(self.BASE_URL, post_action),
