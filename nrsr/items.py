@@ -280,3 +280,13 @@ class BillStepChangeItem(scrapy.Item):
     detail = scrapy.Field()
     attachment_title = scrapy.Field()
     attachment_url = scrapy.Field()
+
+
+class CommitteeItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    name = scrapy.Field(output_processor=TakeFirst())
+    description = scrapy.Field()
+    members = scrapy.Field()
+    url = scrapy.Field(output_processor=TakeFirst())
+    external_id = scrapy.Field(output_processor=TakeFirst())
