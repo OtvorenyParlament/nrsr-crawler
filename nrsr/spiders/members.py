@@ -3,8 +3,9 @@ Members
 """
 
 from datetime import datetime
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlencode
 import scrapy
+from scrapy_splash import SplashRequest
 
 from nrsr.nrsr_spider import NRSRSpider
 from nrsr.items import MemberItem
@@ -29,28 +30,43 @@ class MembersSpider(NRSRSpider):
                 '//*[@id="_sectionLayoutContainer_ctl01__currentTerm"]/option/@value'
             ).extract()
             periods = list(map(int, periods))
-        i = 0
         for period in periods:
-            if i == 0:
-                links = response.xpath(
-                    '//*[@id="_sectionLayoutContainer__panelContent"]/div/div/ul/li/a/@href').extract()
-                for link in links:
-                    yield scrapy.Request('%s%s' % (self.BASE_URL, link), callback=self.parse_member)
-            i += 1
             viewstate = response.css('input#__VIEWSTATE::attr(value)').extract_first()
             eventvalidation = response.css('input#__EVENTVALIDATION::attr(value)').extract_first()
             viewstategenerator = response.css('input#__VIEWSTATEGENERATOR::attr(value)').extract_first()
-            yield scrapy.FormRequest(
-                response.request.url,
-                formdata={
-                    '__EVENTTARGET': '_sectionLayoutContainer$ctl01$_currentTerm',
-                    '_sectionLayoutContainer$ctl01$_currentTerm': str(period),
-                    '_sectionLayoutContainer$ctl01$ctlListType': 'abc',
-                    '__VIEWSTATE': viewstate,
-                    '__EVENTVALIDATION': eventvalidation,
-                    '__VIEWSTATEGENERATOR': viewstategenerator,
+            scroll_x = response.css('input#__SCROLLPOSITIONX::attr(value)').extract_first() or '0'
+            scroll_y = response.css('input#__SCROLLPOSITIONY::attr(value)').extract_first() or '0'
+            post_action = response.xpath('//*[@id="_f"]/@action').extract_first()
+
+            body = {
+                '__EVENTTARGET': '_sectionLayoutContainer$ctl01$_currentTerm',
+                '__EVENTARGUMENT': '',
+                '__LASTFOCUS': '',
+                '__VIEWSTATE': viewstate,
+                '__EVENTVALIDATION': eventvalidation,
+                '__VIEWSTATEGENERATOR': viewstategenerator,
+                '__SCROLLPOSITIONX': scroll_x,
+                '__SCROLLPOSITIONY': scroll_y,
+                '_searchText': '',
+                '_sectionLayoutContainer$ctl01$_currentTerm': str(period),
+                '_sectionLayoutContainer$ctl01$ctlListType': 'abc',
+                '_sectionLayoutContainer$ctl01$ctlShow': 'Zobraziť',
+                '_sectionLayoutContainer$ctl00$_calendarYear': '2019',
+                '_sectionLayoutContainer$ctl00$_calendarMonth': '3',
+                '_sectionLayoutContainer$ctl00$_calendarApp': 'nrdvp',
+                '_sectionLayoutContainer$ctl00$_calendarLang': '',
+                '_sectionLayoutContainer$ctl00$_monthSelector': '3',
+                '_sectionLayoutContainer$ctl00$_yearSelector': '2019',
+            }
+
+            yield SplashRequest(
+                '{}{}'.format(self.BASE_URL, post_action),
+                self.parse_list,
+                args={
+                    'http_method': 'POST',
+                    'body': urlencode(body)
                 },
-                callback=self.parse_list
+                meta={'period_num': period}
             )
 
     def parse_list(self, response):
