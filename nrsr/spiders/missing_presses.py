@@ -60,6 +60,8 @@ class MissingPressSpider(NRSRSpider):
             ).extract_first().strip()
         except KeyError:
             press['title'] = None
+        except AttributeError:
+            raise scrapy.exceptions.DropItem
         try:
             press['press_num'] = int(response.xpath(
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[1]/span/text()'
