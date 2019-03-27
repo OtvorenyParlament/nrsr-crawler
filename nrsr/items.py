@@ -290,3 +290,13 @@ class CommitteeItem(scrapy.Item):
     members = scrapy.Field()
     url = scrapy.Field(output_processor=TakeFirst())
     external_id = scrapy.Field(output_processor=TakeFirst())
+
+
+class CommitteeScheduleItem(scrapy.Item):
+    type = scrapy.Field(output_processor=TakeFirst())
+    period_num = scrapy.Field(output_processor=TakeFirst())
+    committee_name = scrapy.Field(output_processor=TakeFirst())
+    date = scrapy.Field(output_processor=TakeFirst())
+    time = scrapy.Field(output_processor=TakeFirst())
+    place = scrapy.Field()
+    points = scrapy.Field()

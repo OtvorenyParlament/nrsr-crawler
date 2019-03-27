@@ -120,6 +120,13 @@ class NrsrPipeline:
                 'external_id': item['external_id']
             }
 
+        elif item_type == 'committeeschedule':
+            match_dict = {
+                'type': item_type,
+                'date': item['date'],
+                'time': item['time']
+            }
+
         else:
             raise Exception("unknown type {}".format(item['type']))
 
