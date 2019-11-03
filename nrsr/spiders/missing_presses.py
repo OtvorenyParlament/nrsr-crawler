@@ -23,7 +23,7 @@ class MissingPressSpider(NRSRSpider):
         collection = self.mongo_col
 
         wanted = db[collection].find({
-            'type': 'voting'
+            'type': {'$in': ['voting', 'committeeschedule', 'debate_appearance']}
         }, {
             'period_num': 1,
             'press_num': 1
@@ -80,6 +80,12 @@ class MissingPressSpider(NRSRSpider):
                     '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()'
                 ).extract_first().strip(),
                 '%d. %m. %Y').replace(hour=12, minute=0, second=0, microsecond=0)
+        except ValueError:
+            press['date'] = datetime.strptime(
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()'
+                ).extract_first().strip(),
+                '%d.%m.%Y').replace(hour=12, minute=0, second=0, microsecond=0)
         except KeyError:
             press['date'] = None
         press['attachments_names'] = response.xpath(
