@@ -23,23 +23,31 @@ class MissingPressSpider(NRSRSpider):
         collection = self.mongo_col
 
         wanted = db[collection].find({
-            'type': {'$in': ['voting', 'committeeschedule', 'debate_appearance']}
+            'type': {'$in': ['voting', 'debate_appearance']},
+            'period_num': int(self.period)
         }, {
             'period_num': 1,
             'press_num': 1
         })
+        wanted2 = db[collection].aggregate([
+            {'$match': {'type': 'committeeschedule', 'period_num': int(self.period)}},
+            {'$unwind': '$points'},
+            {'$project': {'press_num': '$points.press_num', 'period_num': '$period_num'}}
+        ])
+        wanted2_list = [(x['period_num'], x['press_num']) for x in wanted2 if 'press_num' in x and x['press_num']]
+        
         having = db[collection].find({
-            'type': 'press'
+            'type': 'press',
+            'period_num': int(self.period)
         }, {
             'period_num': 1,
             'press_num': 1
         })
 
-        wanted_list = [(x['period_num'], x['press_num']) for x in wanted
+        wanted_list = [(x['period_num'], x['press_num'][0] if isinstance(x['press_num'], list) else x['press_num']) for x in wanted
                        if 'press_num' in x]
         having_list = [(x['period_num'], x['press_num']) for x in having]
-
-        missing = set(wanted_list) - set(having_list)
+        missing = set(wanted_list + wanted2_list) - set(having_list)
         url_template = 'https://www.nrsr.sk/web/Default.aspx?sid=zakony/cpt&CisObdobia={period_num}&ID={external_id}'
 
         for item in missing:
