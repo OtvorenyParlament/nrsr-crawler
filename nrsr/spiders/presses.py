@@ -195,6 +195,12 @@ class PressSpider(NRSRSpider):
                 '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()').extract_first().strip(),
                 '%d. %m. %Y'
             ).replace(hour=12, minute=0, second=0, microsecond=0)
+        except ValueError:
+            press['date'] = datetime.strptime(
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer_ctl01__cptPanel"]/div/div[3]/span/text()'
+                ).extract_first().strip(),
+                '%d.%m.%Y').replace(hour=12, minute=0, second=0, microsecond=0)
         except KeyError:
             press['date'] = None
         press['attachments_names'] = response.xpath(
