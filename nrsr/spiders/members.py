@@ -102,9 +102,12 @@ class MembersSpider(NRSRSpider):
         if not title:
             title = None
         item.add_value('title', title)
-        item.add_value('stood_for_party', response.xpath(
+        stood_for_party = response.xpath(
             '//*{}/div[1]/div[1]/div[1]/div[4]/span/text()'.format(panel_content)
-        ).extract_first())
+        ).extract_first()
+        if not stood_for_party:
+            stood_for_party = 'V čase zberu dát neuvedené'
+        item.add_value('stood_for_party', stood_for_party)
 
         # GDPR
         # item.add_value('born', datetime.strptime(
