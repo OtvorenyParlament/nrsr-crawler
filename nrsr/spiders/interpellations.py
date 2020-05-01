@@ -215,14 +215,23 @@ class InterpellationsSpider(NRSRSpider):
             response.xpath(
                 '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[3]/span/text()'
             ).extract_first())
-        item.add_value(
-            'date',
-            datetime.strptime(
+        try:
+            date_obj = datetime.strptime(
                 response.xpath(
                     '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[4]/span/text()'
                 ).extract_first(),
                 '%d. %m. %Y'
             ).replace(hour=12)
+        except ValueError:
+            date_obj = datetime.strptime(
+                response.xpath(
+                    '//*[@id="_sectionLayoutContainer__panelContent"]/div[2]/div[4]/span/text()'
+                ).extract_first(),
+                '%d.%m.%Y'
+            ).replace(hour=12)
+        item.add_value(
+            'date',
+            date_obj
         )
         try:
             interpellation_session_num = int(
