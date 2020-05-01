@@ -112,8 +112,13 @@ class BillsSpider(NRSRSpider):
             '//*[@id="_sectionLayoutContainer_ctl01_ctl00__DatumDoruceniaLabel"]/text()'
         ).extract_first()
         if delivered:
-            delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(
-                hour=12, minute=0, second=0, microsecond=0)
+            try:
+                delivered = datetime.strptime(delivered, '%d. %m. %Y').replace(
+                    hour=12, minute=0, second=0, microsecond=0)
+            except ValueError:
+                delivered = datetime.strptime(delivered, '%d.%m.%Y').replace(
+                    hour=12, minute=0, second=0, microsecond=0
+                )
         item.add_value('delivered', delivered)
         try:
             press_num = int(response.xpath(
