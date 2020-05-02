@@ -26,7 +26,7 @@ class CommitteeSpider(NRSRSpider):
             periods = [self.period]
         else:
             periods = response.xpath(
-                '//*[@id="_sectionLayoutContainer_ctl02__currentTerm"]/option/@value'
+                '//*[@id="_sectionLayoutContainer$ctl02$_currentTerm]/option/@value'
             ).extract()
             periods = list(map(int, periods))
         i = 0
